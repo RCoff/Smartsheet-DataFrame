@@ -45,7 +45,12 @@ def get_sheet_as_df(token: str = None,
         raise ValueError("One of 'token' or 'sheet_obj' must be included in parameters")
 
     if token and not sheet_id:
-        raise ValueError("A sheet_id must be included in the parameters")
+        try:
+            import smartsheet.models
+            if isinstance(token, smartsheet.models.sheet.Sheet):
+                raise ValueError("Function must be called with the 'sheet_obj=' keyword argument")
+        except ModuleNotFoundError:
+            raise ValueError("A sheet_id must be included in the parameters if a token is provided")
 
     if sheet_obj and sheet_id:
         logging.warning("A 'sheet_id' has been provided along with a 'sheet_obj'." +
@@ -54,8 +59,9 @@ def get_sheet_as_df(token: str = None,
     if token and sheet_id:
         return _get_sheet_from_request(token, sheet_id, include_row_id, include_parent_id)
     elif sheet_obj:
-        pass
-        # TODO:  return _get_sheet_from_sdk_obj(sheet_obj)
+        return _get_sheet_from_sdk_obj(sheet_obj, include_row_id, include_parent_id)
+
+    print("pause")
 
 
 def _get_sheet_from_request(token: str, sheet_id: int, include_row_id: bool, include_parent_id: bool) -> pd.DataFrame:
@@ -66,14 +72,17 @@ def _get_sheet_from_request(token: str, sheet_id: int, include_row_id: bool, inc
 
     columns_list = [column['title'] for column in response_json['columns']]
 
+    if include_parent_id:
+        columns_list.insert(0, "parent_id")
     if include_row_id:
         columns_list.insert(0, "row_id")
-    if include_parent_id:
-        columns_list.insert(1, "parent_id")
 
     rows_list = []
     for row in response_json['rows']:
         cells_list = []
+        if include_row_id: cells_list.append(int(row['id']))
+        if include_parent_id:
+            cells_list.append(int(row['parentId'])) if 'parentId' in row else cells_list.append('')
         for cell in row['cells']:
             if row['id'] not in cells_list:
                 if include_row_id:
@@ -89,11 +98,44 @@ def _get_sheet_from_request(token: str, sheet_id: int, include_row_id: bool, inc
         else:
             rows_list.append(cells_list)
 
+    df = pd.DataFrame(rows_list, columns=columns_list)
+
     return pd.DataFrame(rows_list, columns=columns_list)
 
 
-def _get_sheet_from_sdk_obj(sheet_obj):
-    pass
+def _get_sheet_from_sdk_obj(sheet_obj: Any, include_row_id: bool, include_parent_id: bool) -> pd.DataFrame:
+    columns_list = [column.title for column in sheet_obj.columns]
+    if include_parent_id:
+        columns_list.insert(0, "parent_id")
+    if include_row_id:
+        columns_list.insert(0, "row_id")
+
+    rows_list = []
+    for row in sheet_obj.rows:
+        cells_list = []
+        if include_row_id:
+            cells_list.append(int(row.id))
+        if include_parent_id:
+            if hasattr(row, 'parent_id'):
+                if row.parent_id:
+                    cells_list.append(int(row.parent_id))
+                else:
+                    cells_list.append('')
+            else:
+                cells_list.append('')
+
+        for cell in row.cells:
+            if hasattr(cell, 'value'):
+                if cell.value:
+                    cells_list.append(cell.value)
+                else:
+                    cells_list.append('')
+            else:
+                cells_list.append('')
+        else:
+            rows_list.append(cells_list)
+
+    return pd.DataFrame(rows_list, columns=columns_list)
 
 
 def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
@@ -105,7 +147,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
 
             if response.status_code != 200:
                 if response_json['errorCode'] == 1002 or response_json['errorCode'] == 1003 or \
-                   response_json['errorCode'] == 1004:
+                        response_json['errorCode'] == 1004:
                     raise AuthenticationError("Could not connect using the supplied auth token \n" +
                                               response.text)
                 elif response_json['errorCode'] == 4004:
