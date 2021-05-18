@@ -54,7 +54,7 @@ def get_report_as_df(token: str = None,
                        "The 'sheet_id' parameter will be ignored")
 
     if token and report_id:
-        return _to_dataframe(_get_report_from_request(token, report_id), include_row_id, include_parent_id)
+        return _to_dataframe(_get_from_request(token, report_id, type_="REPORT"), include_row_id, include_parent_id)
     elif report_obj:
         return _to_dataframe(report_obj.to_dict(), include_row_id, include_parent_id)
 
@@ -92,7 +92,7 @@ def get_sheet_as_df(token: str = None,
                        "The 'sheet_id' parameter will be ignored")
 
     if token and sheet_id:
-        return _to_dataframe(_get_sheet_from_request(token, sheet_id), include_row_id, include_parent_id)
+        return _to_dataframe(_get_from_request(token, sheet_id, type_="SHEET"), include_row_id, include_parent_id)
     elif sheet_obj:
         return _to_dataframe(sheet_obj.to_dict(), include_row_id, include_parent_id)
 
@@ -119,14 +119,13 @@ def get_as_df(type_: str,
                        "The 'id' parameter will be ignored")
 
     if token and id_:
-            return _to_dataframe(_get_from_request(token, id_, type_), include_row_id, include_parent_id)
+        return _to_dataframe(_get_from_request(token, id_, type_), include_row_id, include_parent_id)
     elif obj:
         return _to_dataframe(obj.to_dict(), include_row_id, include_parent_id)
 
 
 def _get_from_request(token: str, id_: int, type_: str) -> dict:
     # TODO: Add error checking
-
     if type_.upper() == "SHEET":
         url = f"https://api.smartsheet.com/2.0/sheets/{id_}?include=objectValue&level=1"
     elif type_.upper() == "REPORT":
@@ -141,7 +140,7 @@ def _get_from_request(token: str, id_: int, type_: str) -> dict:
 
 
 def _to_dataframe(object_dict: dict, include_row_id: bool = True, include_parent_id: bool = True) -> pd.DataFrame:
-
+    # TODO: Add error checking
     columns_list = [column['title'] for column in object_dict['columns']]
 
     if include_parent_id:
