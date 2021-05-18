@@ -97,6 +97,42 @@ def get_sheet_as_df(token: str = None,
         return _sheet_to_dataframe(sheet_obj.to_dict(), include_row_id, include_parent_id)
 
 
+def get_as_df(type: str,
+              token: str = None,
+              id: int = None,
+              obj: Any = None,
+              include_row_id: bool = True,
+              include_parent_id: bool = True) -> pd.DataFrame:
+    if (not token and not obj) or (token and obj):
+        raise ValueError("One of 'token' or 'obj' must be included in parameters")
+
+    if token and not id:
+        try:
+            import smartsheet.models
+            if isinstance(token, smartsheet.models.sheet.Sheet):
+                raise ValueError("Function must be called with the 'sheet_obj=' keyword argument")
+        except ModuleNotFoundError:
+            raise ValueError("A sheet_id must be included in the parameters if a token is provided")
+
+    if obj and id:
+        logger.warning("An 'id' has been provided along with a 'obj' \n" +
+                       "The 'id' parameter will be ignored")
+
+    if token and id:
+        if type.upper() == "SHEET":
+            return _get_sheet_from_request(token, id, include_row_id, include_parent_id)
+        elif type.upper() == "REPORT":
+            return _get_sheet_from_request(token, id, include_row_id, include_parent_id)
+    elif obj:
+        if type.upper() == "SHEET":
+            pass
+            # return _get_sheet_from_sdk_obj(obj, include_row_id, include_parent_id)
+        elif type.upper() == "REPORT":
+            pass
+            # return _get_report_from_sdk_obj(obj, include_row_id, include_parent_id)
+
+
+# TODO: Include Multi-Contact List emails
 def _get_sheet_from_request(token: str, sheet_id: int) -> dict:
     credentials: dict = {"Authorization": f"Bearer {token}"}
     response = _do_request(f"https://api.smartsheet.com/2.0/sheets/{sheet_id}?include=objectValue&level=1",
