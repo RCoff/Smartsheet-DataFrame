@@ -119,26 +119,23 @@ def get_as_df(type_: str,
                        "The 'id' parameter will be ignored")
 
     if token and id_:
-        if type_.upper() == "SHEET":
-            return _to_dataframe(_get_sheet_from_request(token, id_), include_row_id, include_parent_id)
-        elif type_.upper() == "REPORT":
-            return _to_dataframe(_get_sheet_from_request(token, id_), include_row_id, include_parent_id)
+            return _to_dataframe(_get_from_request(token, id_, type_), include_row_id, include_parent_id)
     elif obj:
         return _to_dataframe(obj.to_dict(), include_row_id, include_parent_id)
 
 
-# TODO: Include Multi-Contact List emails
-def _get_sheet_from_request(token: str, sheet_id: int) -> dict:
+def _get_from_request(token: str, id_: int, type_: str) -> dict:
+    # TODO: Add error checking
+
+    if type_.upper() == "SHEET":
+        url = f"https://api.smartsheet.com/2.0/sheets/{id_}?include=objectValue&level=1"
+    elif type_.upper() == "REPORT":
+        url = f"https://api.smartsheet.com/2.0/reports/{id_}?pageSize=50000"
+    else:
+        url = None
+
     credentials: dict = {"Authorization": f"Bearer {token}"}
-    response = _do_request(f"https://api.smartsheet.com/2.0/sheets/{sheet_id}?include=objectValue&level=1",
-                           options=credentials)
-
-    return response.json()
-
-
-def _get_report_from_request(token: str, report_id: int) -> dict:
-    credentials: dict = {"Authorization": f"Bearer {token}"}
-    response = _do_request(f"https://api.smartsheet.com/2.0/reports/{report_id}?pageSize=50000", options=credentials)
+    response = _do_request(url, options=credentials)
 
     return response.json()
 
