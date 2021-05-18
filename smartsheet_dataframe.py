@@ -7,6 +7,9 @@ reports and sheets as a Pandas DataFrame
 
 """
 
+# TODO: Rewrite SDK obj functions to use .to_dict() and request functions
+# TODO: Abstract request portion of request function into sub-function
+
 import pandas as pd
 import requests
 from typing import Any
@@ -89,18 +92,22 @@ def get_sheet_as_df(token: str = None,
                        "The 'sheet_id' parameter will be ignored")
 
     if token and sheet_id:
-        return _get_sheet_from_request(token, sheet_id, include_row_id, include_parent_id)
+        return _to_dataframe(_get_sheet_from_request(token, sheet_id), include_row_id, include_parent_id)
     elif sheet_obj:
-        return _get_sheet_from_sdk_obj(sheet_obj, include_row_id, include_parent_id)
+        return _to_dataframe(sheet_obj.to_dict(), include_row_id, include_parent_id)
 
 
-# TODO: Include Multi-Contact List emails
-def _get_sheet_from_request(token: str, sheet_id: int, include_row_id: bool, include_parent_id: bool) -> pd.DataFrame:
+def _get_sheet_from_request(token: str, sheet_id: int) -> dict:
     credentials: dict = {"Authorization": f"Bearer {token}"}
-    response = _do_request(f"https://api.smartsheet.com/2.0/sheets/{sheet_id}", options=credentials)
-    # requests.get(f"https://api.smartsheet.com/2.0/sheets/{sheet_id}", headers=credentials)
-    response_json = response.json()
+    response = _do_request(f"https://api.smartsheet.com/2.0/sheets/{sheet_id}?include=objectValue&level=1",
+                           options=credentials)
 
+    return response.json()
+
+
+def _to_dataframe(sheet_dict: dict, include_row_id: bool = True, include_parent_id: bool = True) -> pd.DataFrame:
+
+    response_json = sheet_dict
     columns_list = [column['title'] for column in response_json['columns']]
 
     if include_parent_id:
@@ -111,54 +118,16 @@ def _get_sheet_from_request(token: str, sheet_id: int, include_row_id: bool, inc
     rows_list = []
     for row in response_json['rows']:
         cells_list = []
-        if include_row_id: cells_list.append(int(row['id']))
+        if include_row_id:
+            cells_list.append(int(row['id']))
         if include_parent_id:
             cells_list.append(int(row['parentId'])) if 'parentId' in row else cells_list.append('')
-        for cell in row['cells']:
-            if row['id'] not in cells_list:
-                if include_row_id:
-                    cells_list.append(int(row['id']))
-                if include_parent_id:
-                    if 'parentId' in row:
-                        cells_list.append(int(row['parentId']))
 
+        for cell in row['cells']:
             if 'value' in cell:
                 cells_list.append(cell['value'])
-            else:
-                cells_list.append('')
-        else:
-            rows_list.append(cells_list)
-
-    return pd.DataFrame(rows_list, columns=columns_list)
-
-
-def _get_sheet_from_sdk_obj(sheet_obj: Any, include_row_id: bool, include_parent_id: bool) -> pd.DataFrame:
-    columns_list = [column.title for column in sheet_obj.columns]
-    if include_parent_id:
-        columns_list.insert(0, "parent_id")
-    if include_row_id:
-        columns_list.insert(0, "row_id")
-
-    rows_list = []
-    for row in sheet_obj.rows:
-        cells_list = []
-        if include_row_id:
-            cells_list.append(int(row.id))
-        if include_parent_id:
-            if hasattr(row, 'parent_id'):
-                if row.parent_id:
-                    cells_list.append(int(row.parent_id))
-                else:
-                    cells_list.append('')
-            else:
-                cells_list.append('')
-
-        for cell in row.cells:
-            if hasattr(cell, 'value'):
-                if cell.value:
-                    cells_list.append(cell.value)
-                else:
-                    cells_list.append('')
+            elif 'objectValue' in cell:
+                cells_list.append(_handle_object_value(cell['objectValue']))
             else:
                 cells_list.append('')
         else:
@@ -270,6 +239,14 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
         raise Exception(f"Could not retrieve request after retrying {i} times")
 
     return response
+
+
+def _handle_object_value(object_value: Any) -> str:
+    email_list_string: str = ""
+    if object_value['objectType'].upper() == "MULTI_CONTACT":
+        email_list_string = ', '.join(obj['email'] for obj in object_value['values'])
+
+    return email_list_string
 
 
 class AuthenticationError(Exception):
