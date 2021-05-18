@@ -12,7 +12,7 @@ reports and sheets as a Pandas DataFrame
 
 import pandas as pd
 import requests
-from typing import Any
+from typing import Any:
 import logging
 import warnings
 import time
