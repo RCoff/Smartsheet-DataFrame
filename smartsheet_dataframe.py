@@ -23,7 +23,37 @@ def get_report_as_df(token: str = None,
                      include_row_id: bool = True,
                      include_parent_id: bool = True,
                      report_obj: Any = None) -> pd.DataFrame:
-    pass
+    """
+    Get a Smartsheet report as a Pandas DataFrame
+
+    :param token: Smartsheet Personal Access Token
+    :param report_id: ID of report to retrieve
+    :param include_row_id: Include row IDs in DataFrame
+    :param include_parent_id: Include row Parent IDs in DataFrame
+    :param report_obj: Smartsheet Python SDK Report object
+
+    :return: Pandas DataFrame with report data
+    """
+
+    if (not token and not report_obj) or (token and report_obj):
+        raise ValueError("One of 'token' or 'report_obj' must be included in parameters")
+
+    if token and not report_id:
+        try:
+            import smartsheet.models
+            if isinstance(token, smartsheet.models.sheet.Sheet):
+                raise ValueError("Function must be called with the 'report_obj=' keyword argument")
+        except ModuleNotFoundError:
+            raise ValueError("A report_id must be included in the parameters if a token is provided")
+
+    if report_obj and report_id:
+        logger.warning("A 'report_id' has been provided along with a 'report_obj' \n" +
+                       "The 'sheet_id' parameter will be ignored")
+
+    if token and report_id:
+        return _get_report_from_request(token, report_id, include_row_id, include_parent_id)
+    elif report_obj:
+        return _get_report_from_sdk_obj(report_obj, include_row_id, include_parent_id)
 
 
 def get_sheet_as_df(token: str = None,
@@ -55,7 +85,7 @@ def get_sheet_as_df(token: str = None,
             raise ValueError("A sheet_id must be included in the parameters if a token is provided")
 
     if sheet_obj and sheet_id:
-        logger.warning("A 'sheet_id' has been provided along with a 'sheet_obj'." +
+        logger.warning("A 'sheet_id' has been provided along with a 'sheet_obj' \n" +
                        "The 'sheet_id' parameter will be ignored")
 
     if token and sheet_id:
@@ -64,6 +94,7 @@ def get_sheet_as_df(token: str = None,
         return _get_sheet_from_sdk_obj(sheet_obj, include_row_id, include_parent_id)
 
 
+# TODO: Include Multi-Contact List emails
 def _get_sheet_from_request(token: str, sheet_id: int, include_row_id: bool, include_parent_id: bool) -> pd.DataFrame:
     credentials: dict = {"Authorization": f"Bearer {token}"}
     response = _do_request(f"https://api.smartsheet.com/2.0/sheets/{sheet_id}", options=credentials)
@@ -110,6 +141,77 @@ def _get_sheet_from_sdk_obj(sheet_obj: Any, include_row_id: bool, include_parent
 
     rows_list = []
     for row in sheet_obj.rows:
+        cells_list = []
+        if include_row_id:
+            cells_list.append(int(row.id))
+        if include_parent_id:
+            if hasattr(row, 'parent_id'):
+                if row.parent_id:
+                    cells_list.append(int(row.parent_id))
+                else:
+                    cells_list.append('')
+            else:
+                cells_list.append('')
+
+        for cell in row.cells:
+            if hasattr(cell, 'value'):
+                if cell.value:
+                    cells_list.append(cell.value)
+                else:
+                    cells_list.append('')
+            else:
+                cells_list.append('')
+        else:
+            rows_list.append(cells_list)
+
+    return pd.DataFrame(rows_list, columns=columns_list)
+
+
+def _get_report_from_request(token: str, report_id: int, include_row_id: bool, include_parent_id: bool) -> pd.DataFrame:
+    credentials: dict = {"Authorization": f"Bearer {token}"}
+    response = _do_request(f"https://api.smartsheet.com/2.0/reports/{report_id}?pageSize=50000", options=credentials)
+    response_json = response.json()
+
+    columns_list = [column['title'] for column in response_json['columns']]
+
+    if include_parent_id:
+        columns_list.insert(0, "parent_id")
+    if include_row_id:
+        columns_list.insert(0, "row_id")
+
+    rows_list = []
+    for row in response_json['rows']:
+        cells_list = []
+        if include_row_id: cells_list.append(int(row['id']))
+        if include_parent_id:
+            cells_list.append(int(row['parentId'])) if 'parentId' in row else cells_list.append('')
+        for cell in row['cells']:
+            if row['id'] not in cells_list:
+                if include_row_id:
+                    cells_list.append(int(row['id']))
+                if include_parent_id:
+                    if 'parentId' in row:
+                        cells_list.append(int(row['parentId']))
+
+            if 'value' in cell:
+                cells_list.append(cell['value'])
+            else:
+                cells_list.append('')
+        else:
+            rows_list.append(cells_list)
+
+    return pd.DataFrame(rows_list, columns=columns_list)
+
+
+def _get_report_from_sdk_obj(report_obj: Any, include_row_id: bool, include_parent_id: bool) -> pd.DataFrame:
+    columns_list = [column.title for column in report_obj.columns]
+    if include_parent_id:
+        columns_list.insert(0, "parent_id")
+    if include_row_id:
+        columns_list.insert(0, "row_id")
+
+    rows_list = []
+    for row in report_obj.rows:
         cells_list = []
         if include_row_id:
             cells_list.append(int(row.id))
