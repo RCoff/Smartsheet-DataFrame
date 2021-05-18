@@ -15,6 +15,9 @@ import warnings
 import time
 
 
+logger = logging.getLogger(__name__)
+
+
 def get_report_as_df(token: str = None,
                      report_id: int = None,
                      include_row_id: bool = True,
@@ -39,7 +42,6 @@ def get_sheet_as_df(token: str = None,
 
     :return: Pandas DataFrame with sheet data
     """
-    _setup_logging()
 
     if (not token and not sheet_obj) or (token and sheet_obj):
         raise ValueError("One of 'token' or 'sheet_obj' must be included in parameters")
@@ -53,15 +55,13 @@ def get_sheet_as_df(token: str = None,
             raise ValueError("A sheet_id must be included in the parameters if a token is provided")
 
     if sheet_obj and sheet_id:
-        logging.warning("A 'sheet_id' has been provided along with a 'sheet_obj'." +
-                        "The 'sheet_id' parameter will be ignored")
+        logger.warning("A 'sheet_id' has been provided along with a 'sheet_obj'." +
+                       "The 'sheet_id' parameter will be ignored")
 
     if token and sheet_id:
         return _get_sheet_from_request(token, sheet_id, include_row_id, include_parent_id)
     elif sheet_obj:
         return _get_sheet_from_sdk_obj(sheet_obj, include_row_id, include_parent_id)
-
-    print("pause")
 
 
 def _get_sheet_from_request(token: str, sheet_id: int, include_row_id: bool, include_parent_id: bool) -> pd.DataFrame:
@@ -97,8 +97,6 @@ def _get_sheet_from_request(token: str, sheet_id: int, include_row_id: bool, inc
                 cells_list.append('')
         else:
             rows_list.append(cells_list)
-
-    df = pd.DataFrame(rows_list, columns=columns_list)
 
     return pd.DataFrame(rows_list, columns=columns_list)
 
@@ -151,7 +149,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
                     raise AuthenticationError("Could not connect using the supplied auth token \n" +
                                               response.text)
                 elif response_json['errorCode'] == 4004:
-                    logging.debug(f"Rate limit exceeded. Waiting and trying again... {i}")
+                    logger.debug(f"Rate limit exceeded. Waiting and trying again... {i}")
                     time.sleep(5 + (i * 5))
                     continue
                 else:
@@ -159,10 +157,10 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
                                   response.text)
                     return
         except AuthenticationError:
-            logging.exception("Smartsheet returned an error status code")
+            logger.exception("Smartsheet returned an error status code")
             break
         except:
-            logging.exception(f"Not able to retrieve get response. Retrying... {i}")
+            logger.exception(f"Not able to retrieve get response. Retrying... {i}")
             time.sleep(5 + (i * 5))
             continue
         break
@@ -170,12 +168,6 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
         raise Exception(f"Could not retrieve request after retrying {i} times")
 
     return response
-
-
-def _setup_logging():
-    logging.basicConfig(level=logging.DEBUG,
-                        format="%(asctime)s %(levelname)s %(lineno)s %(message)s",
-                        handlers=[logging.StreamHandler()])
 
 
 class AuthenticationError(Exception):
