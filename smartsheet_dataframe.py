@@ -54,9 +54,9 @@ def get_report_as_df(token: str = None,
                        "The 'sheet_id' parameter will be ignored")
 
     if token and report_id:
-        return _report_to_dataframe(_get_report_from_request(token, report_id), include_row_id, include_parent_id)
+        return _to_dataframe(_get_report_from_request(token, report_id), include_row_id, include_parent_id)
     elif report_obj:
-        return _report_to_dataframe(report_obj.to_dict(), include_row_id, include_parent_id)
+        return _to_dataframe(report_obj.to_dict(), include_row_id, include_parent_id)
 
 
 def get_sheet_as_df(token: str = None,
@@ -92,21 +92,21 @@ def get_sheet_as_df(token: str = None,
                        "The 'sheet_id' parameter will be ignored")
 
     if token and sheet_id:
-        return _sheet_to_dataframe(_get_sheet_from_request(token, sheet_id), include_row_id, include_parent_id)
+        return _to_dataframe(_get_sheet_from_request(token, sheet_id), include_row_id, include_parent_id)
     elif sheet_obj:
-        return _sheet_to_dataframe(sheet_obj.to_dict(), include_row_id, include_parent_id)
+        return _to_dataframe(sheet_obj.to_dict(), include_row_id, include_parent_id)
 
 
-def get_as_df(type: str,
+def get_as_df(type_: str,
               token: str = None,
-              id: int = None,
+              id_: int = None,
               obj: Any = None,
               include_row_id: bool = True,
               include_parent_id: bool = True) -> pd.DataFrame:
     if (not token and not obj) or (token and obj):
         raise ValueError("One of 'token' or 'obj' must be included in parameters")
 
-    if token and not id:
+    if token and not id_:
         try:
             import smartsheet.models
             if isinstance(token, smartsheet.models.sheet.Sheet):
@@ -114,22 +114,17 @@ def get_as_df(type: str,
         except ModuleNotFoundError:
             raise ValueError("A sheet_id must be included in the parameters if a token is provided")
 
-    if obj and id:
+    if obj and id_:
         logger.warning("An 'id' has been provided along with a 'obj' \n" +
                        "The 'id' parameter will be ignored")
 
-    if token and id:
-        if type.upper() == "SHEET":
-            return _get_sheet_from_request(token, id, include_row_id, include_parent_id)
-        elif type.upper() == "REPORT":
-            return _get_sheet_from_request(token, id, include_row_id, include_parent_id)
+    if token and id_:
+        if type_.upper() == "SHEET":
+            return _to_dataframe(_get_sheet_from_request(token, id_), include_row_id, include_parent_id)
+        elif type_.upper() == "REPORT":
+            return _to_dataframe(_get_sheet_from_request(token, id_), include_row_id, include_parent_id)
     elif obj:
-        if type.upper() == "SHEET":
-            pass
-            # return _get_sheet_from_sdk_obj(obj, include_row_id, include_parent_id)
-        elif type.upper() == "REPORT":
-            pass
-            # return _get_report_from_sdk_obj(obj, include_row_id, include_parent_id)
+        return _to_dataframe(obj.to_dict(), include_row_id, include_parent_id)
 
 
 # TODO: Include Multi-Contact List emails
@@ -148,9 +143,9 @@ def _get_report_from_request(token: str, report_id: int) -> dict:
     return response.json()
 
 
-def _sheet_to_dataframe(sheet_dict: dict, include_row_id: bool = True, include_parent_id: bool = True) -> pd.DataFrame:
+def _to_dataframe(object_dict: dict, include_row_id: bool = True, include_parent_id: bool = True) -> pd.DataFrame:
 
-    columns_list = [column['title'] for column in sheet_dict['columns']]
+    columns_list = [column['title'] for column in object_dict['columns']]
 
     if include_parent_id:
         columns_list.insert(0, "parent_id")
@@ -158,7 +153,7 @@ def _sheet_to_dataframe(sheet_dict: dict, include_row_id: bool = True, include_p
         columns_list.insert(0, "row_id")
 
     rows_list = []
-    for row in sheet_dict['rows']:
+    for row in object_dict['rows']:
         cells_list = []
         if include_row_id:
             cells_list.append(int(row['id']))
@@ -170,39 +165,6 @@ def _sheet_to_dataframe(sheet_dict: dict, include_row_id: bool = True, include_p
                 cells_list.append(cell['value'])
             elif 'objectValue' in cell:
                 cells_list.append(_handle_object_value(cell['objectValue']))
-            else:
-                cells_list.append('')
-        else:
-            rows_list.append(cells_list)
-
-    return pd.DataFrame(rows_list, columns=columns_list)
-
-
-def _report_to_dataframe(report_dict: dict, include_row_id: bool, include_parent_id: bool) -> pd.DataFrame:
-
-    columns_list = [column['title'] for column in report_dict['columns']]
-
-    if include_parent_id:
-        columns_list.insert(0, "parent_id")
-    if include_row_id:
-        columns_list.insert(0, "row_id")
-
-    rows_list = []
-    for row in report_dict['rows']:
-        cells_list = []
-        if include_row_id: cells_list.append(int(row['id']))
-        if include_parent_id:
-            cells_list.append(int(row['parentId'])) if 'parentId' in row else cells_list.append('')
-        for cell in row['cells']:
-            if row['id'] not in cells_list:
-                if include_row_id:
-                    cells_list.append(int(row['id']))
-                if include_parent_id:
-                    if 'parentId' in row:
-                        cells_list.append(int(row['parentId']))
-
-            if 'value' in cell:
-                cells_list.append(cell['value'])
             else:
                 cells_list.append('')
         else:
