@@ -28,8 +28,10 @@ def get_report_as_df(token: str = None,
 
     :param token: Smartsheet Personal Access Token
     :param report_id: ID of report to retrieve
-    :param include_row_id: Include row IDs in DataFrame
-    :param include_parent_id: Include row Parent IDs in DataFrame
+    :param include_row_id: If True, will append a 'row_id' column to the dataframe
+            and populate with row id for each row in sheet
+    :param include_parent_id: If True, will append a 'parent_id' column to the
+            dataframe and populat with parent ID for each nested row
     :param report_obj: Smartsheet Python SDK Report object
 
     :return: Pandas DataFrame with report data
@@ -64,10 +66,12 @@ def get_sheet_as_df(token: str = None,
     """
     Get a Smartsheet sheet as a Pandas DataFrame
 
-    :param token: Smartsheet Personal Authentication Token
+    :param token: Smartsheet personal authentication token
     :param sheet_id: Smartsheet source sheet ID to get
-    :param include_row_id: Include row IDs in DataFrame
-    :param include_parent_id: Include row Parent IDs in DataFrame
+    :param include_row_id: If True, will append a 'row_id' column to the dataframe
+            and populate with row id for each row in sheet
+    :param include_parent_id: If True, will append a 'parent_id' column to the
+            dataframe and populat with parent ID for each nested row
     :param sheet_obj: Smartsheet Python SDK sheet object
 
     :return: Pandas DataFrame with sheet data
@@ -100,6 +104,20 @@ def get_as_df(type_: str,
               obj: Any = None,
               include_row_id: bool = True,
               include_parent_id: bool = True) -> pd.DataFrame:
+    """
+    Get a Smartsheet report or sheet as a Pandas DataFrame
+
+    :param type_: type of object to get. Must be one of 'report' or 'sheet'
+    :param token: Smartsheet personal authentication token
+    :param id_: Smartsheet object ID
+    :param obj: Smartsheet SDK object
+    :param include_row_id: If True, will append a 'row_id' column to the dataframe
+            and populate with row id for each row in sheet
+    :param include_parent_id: If True, will append a 'parent_id' column to the
+            dataframe and populat with parent ID for each nested row
+
+    :return: Pandas DataFrame with object data
+    """
     if (not token and not obj) or (token and obj):
         raise ValueError("One of 'token' or 'obj' must be included in parameters")
 
@@ -124,14 +142,14 @@ def get_as_df(type_: str,
 def _get_from_request(token: str, id_: int, type_: str) -> dict:
     if type_.upper() == "SHEET":
         url = f"https://api.smartsheet.com/2.0/sheets/{id_}?include=objectValue&level=1"
-        logging.debug("Getting sheet request", extra={'id': id_,
-                                                      'url': url,
-                                                      'object_type': 'sheet'})
+        logger.debug("Getting sheet request", extra={'id': id_,
+                                                     'url': url,
+                                                     'object_type': 'sheet'})
     elif type_.upper() == "REPORT":
         url = f"https://api.smartsheet.com/2.0/reports/{id_}?pageSize=50000"
-        logging.debug("Getting report request", extra={'id': id_,
-                                                       'url': url,
-                                                       'object_Type': 'report'})
+        logger.debug("Getting report request", extra={'id': id_,
+                                                      'url': url,
+                                                      'object_Type': 'report'})
     else:
         url = None
         raise ValueError(f"'type_' parameter must be one of SHEET or REPORT. The current value is {type_.upper()}")
