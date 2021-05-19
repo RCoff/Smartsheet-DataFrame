@@ -125,13 +125,19 @@ def get_as_df(type_: str,
 
 
 def _get_from_request(token: str, id_: int, type_: str) -> dict:
-    # TODO: Add error checking
     if type_.upper() == "SHEET":
         url = f"https://api.smartsheet.com/2.0/sheets/{id_}?include=objectValue&level=1"
+        logging.debug("Getting sheet request", extra={'id': id_,
+                                                      'url': url,
+                                                      'object_type': 'sheet'})
     elif type_.upper() == "REPORT":
         url = f"https://api.smartsheet.com/2.0/reports/{id_}?pageSize=50000"
+        logging.debug("Getting report request", extra={'id': id_,
+                                                       'url': url,
+                                                       'object_Type': 'report'})
     else:
         url = None
+        raise ValueError(f"'type_' parameter must be one of SHEET or REPORT. The current value is {type_.upper()}")
 
     credentials: dict = {"Authorization": f"Bearer {token}"}
     response = _do_request(url, options=credentials)
@@ -140,7 +146,6 @@ def _get_from_request(token: str, id_: int, type_: str) -> dict:
 
 
 def _to_dataframe(object_dict: dict, include_row_id: bool = True, include_parent_id: bool = True) -> pd.DataFrame:
-    # TODO: Add error checking
     columns_list = [column['title'] for column in object_dict['columns']]
 
     if include_parent_id:
