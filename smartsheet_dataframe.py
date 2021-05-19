@@ -37,7 +37,7 @@ def get_report_as_df(token: str = None,
     :return: Pandas DataFrame with report data
     """
 
-    if (not token and not report_obj) or (token and report_obj):
+    if not (token or report_obj):
         raise ValueError("One of 'token' or 'report_obj' must be included in parameters")
 
     if token and not report_id:
@@ -77,7 +77,7 @@ def get_sheet_as_df(token: str = None,
     :return: Pandas DataFrame with sheet data
     """
 
-    if (not token and not sheet_obj) or (token and sheet_obj):
+    if not (token or sheet_obj):
         raise ValueError("One of 'token' or 'sheet_obj' must be included in parameters")
 
     if token and not sheet_id:
@@ -118,7 +118,7 @@ def get_as_df(type_: str,
 
     :return: Pandas DataFrame with object data
     """
-    if (not token and not obj) or (token and obj):
+    if not (token or obj):
         raise ValueError("One of 'token' or 'obj' must be included in parameters")
 
     if token and not id_:
