@@ -7,9 +7,6 @@ reports and sheets as a Pandas DataFrame
 
 """
 
-# TODO: Rewrite SDK obj functions to use .to_dict() and request functions
-# TODO: Abstract request portion of request function into sub-function
-
 import pandas as pd
 import requests
 from typing import Any
