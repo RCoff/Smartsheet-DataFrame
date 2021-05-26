@@ -3,6 +3,8 @@ __pycache__/
 .idea/
 dist/
 src/
+build/
+*.egg-info/
 *.log
 config.py
 dev.py
