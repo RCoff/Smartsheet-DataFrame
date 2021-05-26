@@ -5,7 +5,7 @@ setuptools.setup(
     version="0.1.8",
     install_requires=[
         'pandas>=1.1.0',
-        'requests>=2'
+        'requests>=2.20.0'
     ],
     author="Ridge Coffman",
     author_email="coffman.ridge@gmail.com",
