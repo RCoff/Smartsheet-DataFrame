@@ -74,12 +74,9 @@ df = get_as_df(type_='sheet',
 Installation
 ------------
 
-Requirements
-~~~~~~~~~~~~
+##### Requirements
 * Python 3+ (Tested using 3.6.5+)
 * Pandas >= 0.24.0
 
-From PyPI
-~~~~~~~~~
-.. code:: sh
+##### From PyPI
     pip install smartsheet-dataframe
