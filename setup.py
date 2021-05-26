@@ -4,7 +4,7 @@ setuptools.setup(
     name="smartsheet-dataframe",
     version="0.1",
     install_requires=[
-        "pandas>=1.1.0",
+        "pandas>=0.24.0",
         "requests>=2.25.0"
     ],
     author="Ridge Coffman",
@@ -17,8 +17,8 @@ setuptools.setup(
     keywords=['spreadsheet', 'smartsheet', 'pandas', 'dataframe'],
     classifiers=[
         "Natural Language :: English",
-        "Programming Language :: Python :: 3.7",
-        "License :: OSI Approved :: MIT License"
+        "Programming Language :: Python :: 3.6",
+        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Topic :: Office/Business :: Financial :: Spreadsheet",
     ],
