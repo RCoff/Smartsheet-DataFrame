@@ -223,7 +223,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
     return response
 
 
-def _handle_object_value(object_value: Any) -> str:
+def _handle_object_value(object_value: dict) -> str:
     email_list_string: str = ""
     if object_value['objectType'].upper() == "MULTI_CONTACT":
         email_list_string = ', '.join(obj['email'] for obj in object_value['values'])
