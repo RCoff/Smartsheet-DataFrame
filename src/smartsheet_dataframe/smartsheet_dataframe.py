@@ -223,6 +223,41 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
     return response
 
 
+def set_as_dataframe(df: pd.DataFrame,
+                     sheet_id: int,
+                     token: str = None,
+                     smartsheet_client: Any = None,
+                     erase_sheet: bool = False,
+                     insert_columns: bool = False,
+                     column_mapping: dict = None) -> None:
+    """
+    Set values in a Smartsheet from a Pandas DataFrame
+    ..................................................
+
+    One of 'token' or 'smartsheet_client' parameters must be supplied
+
+    :param df: Pandas DataFrame to copy into sheet
+    :param sheet_id: ID of destination sheet
+    :param token: Smartsheet Authentication Token
+    :param smartsheet_client: smartsheet-python-sdk authentication object
+    :param erase_sheet: If True, will erase all values in a sheet before inserting DataFrame
+    :param insert_columns: If True, columns not found in the sheet will be inserted
+    :param column_mapping: Mapping for Pandas Columns to Dict containing key-value source:destination pairs.
+            This should look like: {'pandas df column name': 'smartsheet_column_name'}
+
+    :return: None
+    """
+
+    if token:
+        if smartsheet_client:
+            logging.debug("Both 'token' and 'smartsheet_client' were given in function parameters. \n" +
+                          "'smartsheet_client' will be ignored")
+    elif smartsheet_client:
+        pass
+    else:
+        pass
+
+
 def _handle_object_value(object_value: dict) -> str:
     email_list_string: str = ""
     if object_value['objectType'].upper() == "MULTI_CONTACT":
