@@ -1,8 +1,8 @@
 import setuptools
 
 setuptools.setup(
-    name="Smartsheet-DataFrame-RCoff",
-    version="0.0.1",
+    name="smartsheet-dataframe",
+    version="0.1",
     install_requires=[
         "pandas>=1.1.0",
         "requests>=2.25.0"
