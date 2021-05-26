@@ -2,10 +2,10 @@ import setuptools
 
 setuptools.setup(
     name="smartsheet-dataframe",
-    version="0.1",
+    version="0.1.8",
     install_requires=[
-        "pandas>=0.24.0",
-        "requests>=2.25.0"
+        'pandas>=1.1.0',
+        'requests>=2'
     ],
     author="Ridge Coffman",
     author_email="coffman.ridge@gmail.com",
@@ -22,7 +22,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Topic :: Office/Business :: Financial :: Spreadsheet",
     ],
-    package_dir={"": "src"},
+    package_dir={'': 'src'},
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.6.5"
 )
