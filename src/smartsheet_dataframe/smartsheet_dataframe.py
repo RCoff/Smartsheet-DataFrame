@@ -189,11 +189,24 @@ def _to_dataframe(object_dict: dict, include_row_id: bool = True, include_parent
     return pd.DataFrame(rows_list, columns=columns_list)
 
 
-def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
+def _do_request(url: str, method: str = 'GET', options: dict = None,
+                data: dict = None, token: str = None, retries: int = 3) -> requests.Response:
+    if not (options or token):
+        raise ValueError("Neither 'options' nor 'token' were provided. One of these is required")
+    elif options and not token:
+        if not options.get("Authorization"):
+            raise ValueError("'Authorization' missing from options.")
+    elif options and token:
+        if not options.get("Authorization"):
+            options.update({"Authorization": f"Bearer {token}"})
+    elif token:
+        options = {"Authorization": f"Bearer {token}"}
+
     i = 0
+    response = None
     for i in range(retries):
         try:
-            response = requests.get(url, headers=options)
+            response = requests.request(method=method.upper(), url=url, headers=options)
             response_json = response.json()
 
             if response.status_code != 200:
@@ -208,7 +221,6 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
                 else:
                     warnings.warn("An unhandled status_code was returned by the Smartsheet API: \n" +
                                   response.text)
-                    return
         except AuthenticationError:
             logger.exception("Smartsheet returned an error status code")
             break
@@ -223,13 +235,13 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
     return response
 
 
-def set_as_dataframe(df: pd.DataFrame,
-                     sheet_id: int,
-                     token: str = None,
-                     smartsheet_client: Any = None,
-                     erase_sheet: bool = False,
-                     insert_columns: bool = False,
-                     column_mapping: dict = None) -> None:
+def set_as_df(df: pd.DataFrame,
+              sheet_id: int,
+              token: str = None,
+              smartsheet_client: Any = None,
+              erase_sheet: bool = False,
+              insert_columns: bool = False,
+              column_mapping: dict = None) -> None:
     """
     Set values in a Smartsheet from a Pandas DataFrame
     ..................................................
@@ -248,14 +260,45 @@ def set_as_dataframe(df: pd.DataFrame,
     :return: None
     """
 
+    sheet = None
     if token:
         if smartsheet_client:
             logging.debug("Both 'token' and 'smartsheet_client' were given in function parameters. \n" +
                           "'smartsheet_client' will be ignored")
+
+        sheet = _get_from_request(token=token, id_=sheet_id, type_='sheet')
     elif smartsheet_client:
+        sheet = smartsheet_client.Sheets.get_sheet(sheet_id).to_dict()
+
+    columns_dict = _get_columns_dict(sheet)  # {col['title']: col['id'] for col in sheet['columns']}
+    row_ids_list = [str(row['id']) for row in sheet['rows']]
+
+    if erase_sheet:
+        if row_ids_list:
+            logging.debug("Deleting rows from sheet")
+            if smartsheet_client:
+                smartsheet_client.Sheets.delete_rows(sheet_id, row_ids_list)
+            elif token:
+                _do_request(f"https://api.smartsheet.com/2.0/sheets/{sheet_id}/rows?ids={','.join(row_ids_list)}&ignoreRowsNotFound=true",
+                            token=token, method='DELETE')
+
+    if insert_columns:
+        for col in df.columns.tolist():
+            if not columns_dict.get(col):
+                logging.debug(f"Creating '{col}' in sheet")
+                if smartsheet_client:
+                    pass
+                elif token:
+                    _do_request(f"https://api.smartsheet.com/2.0/sheets/{sheet_id}/columns",
+                                token=token, method='POST')
+                # Insert columns
+
+    # Something goes here
+
+    for index, row in df.iterrows():
         pass
-    else:
-        pass
+
+    print("pause")
 
 
 def _handle_object_value(object_value: dict) -> str:
@@ -264,6 +307,12 @@ def _handle_object_value(object_value: dict) -> str:
         email_list_string = ', '.join(obj['email'] for obj in object_value['values'])
 
     return email_list_string
+
+
+def _get_columns_dict(sheet: dict) -> dict:
+    return {col['title']: {'id': col['id'],
+                           'type': col['type'],
+                           'index': col['index']} for col in sheet['columns']}
 
 
 class AuthenticationError(Exception):
