@@ -190,7 +190,7 @@ def _to_dataframe(object_dict: dict, include_row_id: bool = True, include_parent
 
 
 def _do_request(url: str, method: str = 'GET', options: dict = None,
-                data: dict = None, token: str = None, retries: int = 3) -> requests.Response:
+                data: dict = None, json=None, token: str = None, retries: int = 3) -> requests.Response:
     if not (options or token):
         raise ValueError("Neither 'options' nor 'token' were provided. One of these is required")
     elif options and not token:
@@ -206,7 +206,7 @@ def _do_request(url: str, method: str = 'GET', options: dict = None,
     response = None
     for i in range(retries):
         try:
-            response = requests.request(method=method.upper(), url=url, headers=options)
+            response = requests.request(method=method.upper(), url=url, headers=options, json=json, data=data)
             response_json = response.json()
 
             if response.status_code != 200:
@@ -282,18 +282,23 @@ def set_as_df(df: pd.DataFrame,
                 _do_request(f"https://api.smartsheet.com/2.0/sheets/{sheet_id}/rows?ids={','.join(row_ids_list)}&ignoreRowsNotFound=true",
                             token=token, method='DELETE')
 
+    add_columns_list = []
     if insert_columns:
         for col in df.columns.tolist():
-            if not columns_dict.get(col):
-                logging.debug(f"Creating '{col}' in sheet")
+            if col != 'row_id' and col != 'parent_id':
+                if not columns_dict.get(col):
+                    # TODO: Create function to guess column type
+                    add_columns_list.append({'title': col, 'type': "TEXT_NUMBER", "index": len(columns_dict)})
+        else:
+            if add_columns_list:
                 if smartsheet_client:
-                    pass
+                    import smartsheet.models
+                    add_smartsheet_cols = [smartsheet.models.Column(col) for col in add_columns_list]
+                    smartsheet_client.Sheets.add_columns(sheet_id, add_smartsheet_cols)
                 elif token:
                     _do_request(f"https://api.smartsheet.com/2.0/sheets/{sheet_id}/columns",
-                                token=token, method='POST')
-                # Insert columns
-
-    # Something goes here
+                                token=token, method='POST', json=add_columns_list,
+                                options={"Content-Type": "application/json"})
 
     for index, row in df.iterrows():
         pass
