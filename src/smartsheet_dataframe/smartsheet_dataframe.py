@@ -139,6 +139,50 @@ def get_as_df(type_: str,
         return _to_dataframe(obj.to_dict(), include_row_id, include_parent_id)
 
 
+def get_column_ids(type_: str,
+              token: str = None,
+              id_: int = None,
+              obj: Any = None) -> dict:
+    """
+    Get a Column ids from a Smartsheet Sheet
+
+    :param type_: type of object to get. Must be one of 'report' or 'sheet'
+    :param token: Smartsheet personal authentication token
+    :param id_: Smartsheet object ID
+    :param obj: Smartsheet SDK object
+
+    :return: Dictionary with the column Titles and Ids
+    """
+
+    if type_.upper() != 'SHEET':
+	raise ValueError("type_ must be 'sheet'")
+	    
+    if not (token or obj):
+        raise ValueError("One of 'token' or 'obj' must be included in parameters")
+
+    if token and not id_:
+        try:
+            import smartsheet.models
+            if isinstance(token, smartsheet.models.sheet.Sheet):
+                raise ValueError("Function must be called with the 'sheet_obj=' keyword argument")
+        except ModuleNotFoundError:
+            raise ValueError("A sheet_id must be included in the parameters if a token is provided")
+
+    if obj and id_:
+        logger.warning("An 'id' has been provided along with a 'obj' \n" +
+                       "The 'id' parameter will be ignored")
+
+    if token and id_:
+        return _map_column_ids(_get_from_request(token, id_, type_))
+    elif obj:
+        return _map_column_ids(obj.to_dict())
+
+
+def _map_column_ids(object_dict: dict) -> dict:
+    sh_columns = sheet_obj_json['columns']
+    return {column['title']: column['id'] for column in sh_columns}
+
+
 def _get_from_request(token: str, id_: int, type_: str) -> dict:
     if type_.upper() == "SHEET":
         url = f"https://api.smartsheet.com/2.0/sheets/{id_}?include=objectValue&level=1"
