@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="smartsheet-dataframe",
-    version="0.2.0",
+    version="0.2.1",
     install_requires=[
         'pandas>=1.1.0',
         'requests>=2.20.0'
