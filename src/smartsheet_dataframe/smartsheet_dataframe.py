@@ -179,7 +179,7 @@ def get_column_ids(type_: str,
 
 
 def _map_column_ids(object_dict: dict) -> dict:
-    sh_columns = sheet_obj_json['columns']
+    sh_columns = object_dict['columns']
     return {column['title']: column['id'] for column in sh_columns}
 
 
