@@ -144,7 +144,7 @@ def get_column_ids(type_: str,
               id_: int = None,
               obj: Any = None) -> dict:
     """
-    Get a Column ids from a Smartsheet Sheet
+    Get the Column ids from a Smartsheet Sheet
 
     :param type_: type of object to get. Must be one of 'report' or 'sheet'
     :param token: Smartsheet personal authentication token
@@ -174,10 +174,14 @@ def get_column_ids(type_: str,
         logger.warning("An 'id' has been provided along with a 'obj' \n" +
                        "The 'id' parameter will be ignored")
 
-    if token and id_:
-        return _map_column_ids(_get_from_request(token, id_, type_))
-    elif obj:
+    if not isinstance(obj, smartsheet.models.sheet.Sheet):
         return _map_column_ids(obj.to_dict())
+    if token and id_:
+        if not (isinstance(token, str) and isinstance(id_, int)):
+            raise ValueError("token must be str and id_ must be int")
+        return _map_column_ids(_get_from_request(token, id_, type_))
+    else:
+        raise ValueError("obj must be a SDK sheet object")
 
 
 def _map_column_ids(object_dict: dict) -> dict:
