@@ -155,7 +155,7 @@ def get_column_ids(type_: str,
     """
 
     if type_.upper() != 'SHEET':
-	raise ValueError("type_ must be 'sheet'")
+        raise ValueError("type_ must be 'sheet'")
 	    
     if not (token or obj):
         raise ValueError("One of 'token' or 'obj' must be included in parameters")
