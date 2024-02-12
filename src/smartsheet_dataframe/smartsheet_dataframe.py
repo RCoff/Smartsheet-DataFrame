@@ -173,7 +173,6 @@ def get_column_ids(type_: str,
         raise ValueError("Invalid input. token: str id_: int obj: SDK Sheet Object")
 
 
-
 def _map_column_ids(object_dict: dict) -> dict:
     sh_columns = object_dict['columns']
     return {column['title']: column['id'] for column in sh_columns}
