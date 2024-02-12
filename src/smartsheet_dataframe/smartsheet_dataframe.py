@@ -174,7 +174,7 @@ def get_column_ids(type_: str,
         logger.warning("An 'id' has been provided along with a 'obj' \n" +
                        "The 'id' parameter will be ignored")
 
-    if not isinstance(obj, smartsheet.models.sheet.Sheet):
+    if isinstance(obj, smartsheet.models.sheet.Sheet):
         return _map_column_ids(obj.to_dict())
     elif token and id_:
         if not (isinstance(token, str) and isinstance(id_, int)):
