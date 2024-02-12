@@ -176,7 +176,7 @@ def get_column_ids(type_: str,
 
     if not isinstance(obj, smartsheet.models.sheet.Sheet):
         return _map_column_ids(obj.to_dict())
-    if token and id_:
+    elif token and id_:
         if not (isinstance(token, str) and isinstance(id_, int)):
             raise ValueError("token must be str and id_ must be int")
         return _map_column_ids(_get_from_request(token, id_, type_))
