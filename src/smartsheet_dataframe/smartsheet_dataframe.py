@@ -13,6 +13,7 @@ from typing import Any
 import logging
 import warnings
 import time
+import smartsheet.models
 
 
 logger = logging.getLogger(__name__)
