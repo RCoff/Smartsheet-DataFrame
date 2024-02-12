@@ -140,6 +140,7 @@ def get_as_df(type_: str,
 
 
 def get_column_ids(type_: str,
+              *,
               token: str = None,
               id_: int = None,
               obj: Any = None) -> dict:
@@ -160,28 +161,17 @@ def get_column_ids(type_: str,
     if not (token or obj):
         raise ValueError("One of 'token' or 'obj' must be included in parameters")
 
-    if token and not id_:
-        if isinstance(token, str):
-            raise ValueError("A sheet_id must be included in the parameters if a token is provided")
-        try:
-            import smartsheet.models
-            if isinstance(token, smartsheet.models.sheet.Sheet):
-                raise ValueError("Function must be called with the 'sheet_obj=' keyword argument")
-        except ModuleNotFoundError:
-            raise ValueError("A token and sheet_id must be provided")
-
-    if obj and id_:
-        logger.warning("An 'id' has been provided along with a 'obj' \n" +
-                       "The 'id' parameter will be ignored")
-
-    if isinstance(obj, smartsheet.models.sheet.Sheet):
+    if obj is not None and isinstance(obj, smartsheet.models.sheet.Sheet):
         return _map_column_ids(obj.to_dict())
-    elif token and id_:
-        if not (isinstance(token, str) and isinstance(id_, int)):
-            raise ValueError("token must be str and id_ must be int")
+
+    if token and not id_:
+        raise ValueError("A sheet_id must be included in the parameters if a token is provided")
+    
+    if isinstance(token, str) and isinstance(id_, int):
         return _map_column_ids(_get_from_request(token, id_, type_))
     else:
-        raise ValueError("obj must be a SDK sheet object")
+        raise ValueError("Invalid input. token: str id_: int obj: SDK Sheet Object")
+
 
 
 def _map_column_ids(object_dict: dict) -> dict:
