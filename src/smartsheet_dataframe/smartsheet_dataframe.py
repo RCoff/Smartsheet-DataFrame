@@ -161,12 +161,14 @@ def get_column_ids(type_: str,
         raise ValueError("One of 'token' or 'obj' must be included in parameters")
 
     if token and not id_:
+        if isinstance(token, str):
+            raise ValueError("A sheet_id must be included in the parameters if a token is provided")
         try:
             import smartsheet.models
             if isinstance(token, smartsheet.models.sheet.Sheet):
                 raise ValueError("Function must be called with the 'sheet_obj=' keyword argument")
         except ModuleNotFoundError:
-            raise ValueError("A sheet_id must be included in the parameters if a token is provided")
+            raise ValueError("A token and sheet_id must be provided")
 
     if obj and id_:
         logger.warning("An 'id' has been provided along with a 'obj' \n" +
