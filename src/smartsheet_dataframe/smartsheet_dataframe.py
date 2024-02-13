@@ -144,14 +144,14 @@ def get_column_ids(type_: str,
               *,
               token: str = None,
               id_: int = None,
-              obj: Any = None) -> dict:
+              sheet_obj: Any = None) -> dict:
     """
     Get the Column ids from a Smartsheet Sheet
 
     :param type_: type of object to get. Must be one of 'report' or 'sheet'
     :param token: Smartsheet personal authentication token
     :param id_: Smartsheet object ID
-    :param obj: Smartsheet SDK object
+    :param sheet_obj: Smartsheet SDK object
 
     :return: Dictionary with the column Titles and Ids
     """
@@ -159,11 +159,11 @@ def get_column_ids(type_: str,
     if type_.upper() != 'SHEET':
         raise ValueError("type_ must be 'sheet'")
 	    
-    if not (token or obj):
+    if not (token or sheet_obj):
         raise ValueError("One of 'token' or 'obj' must be included in parameters")
 
-    if obj is not None and isinstance(obj, smartsheet.models.sheet.Sheet):
-        return _map_column_ids(obj.to_dict())
+    if isinstance(sheet_obj, smartsheet.models.sheet.Sheet):
+        return _map_column_ids(sheet_obj.to_dict())
 
     if token and not id_:
         raise ValueError("A sheet_id must be included in the parameters if a token is provided")
@@ -171,7 +171,7 @@ def get_column_ids(type_: str,
     if isinstance(token, str) and isinstance(id_, int):
         return _map_column_ids(_get_from_request(token, id_, type_))
     else:
-        raise ValueError("Invalid input. token: str id_: int obj: SDK Sheet Object")
+        raise ValueError("Invalid input. token: str id_: int sheet_obj: SDK Sheet Object")
 
 
 def _map_column_ids(object_dict: dict) -> dict:
