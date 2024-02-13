@@ -160,18 +160,18 @@ def get_column_ids(type_: str,
         raise ValueError("type_ must be 'sheet'")
 	    
     if not (token or sheet_obj):
-        raise ValueError("One of 'token' or 'obj' must be included in parameters")
+        raise ValueError("missing 1 required keyword-only argument: 'token' or 'sheet_obj'")
 
     if isinstance(sheet_obj, smartsheet.models.sheet.Sheet):
         return _map_column_ids(sheet_obj.to_dict())
 
     if token and not id_:
-        raise ValueError("A sheet_id must be included in the parameters if a token is provided")
+        raise ValueError("missing 1 required keyword-only argument: id_")
     
     if isinstance(token, str) and isinstance(id_, int):
         return _map_column_ids(_get_from_request(token, id_, type_))
     else:
-        raise ValueError("Invalid input. token: str id_: int sheet_obj: SDK Sheet Object")
+        raise ValueError("Invalid input. token: str, id_: int, sheet_obj: SDK Sheet Object")
 
 
 def _map_column_ids(object_dict: dict) -> dict:
