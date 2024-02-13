@@ -126,7 +126,7 @@ def get_as_df(type_: str,
         try:
             import smartsheet.models
             if isinstance(token, smartsheet.models.sheet.Sheet):
-                raise ValueError("Function must be called with the 'sheet_obj=' keyword argument")
+                raise ValueError("Function must be called with the 'obj=' keyword argument")
         except ModuleNotFoundError:
             raise ValueError("A sheet_id must be included in the parameters if a token is provided")
 
