@@ -13,6 +13,7 @@ from typing import Any
 import logging
 import warnings
 import time
+import smartsheet.models
 
 
 logger = logging.getLogger(__name__)
@@ -125,7 +126,7 @@ def get_as_df(type_: str,
         try:
             import smartsheet.models
             if isinstance(token, smartsheet.models.sheet.Sheet):
-                raise ValueError("Function must be called with the 'sheet_obj=' keyword argument")
+                raise ValueError("Function must be called with the 'obj=' keyword argument")
         except ModuleNotFoundError:
             raise ValueError("A sheet_id must be included in the parameters if a token is provided")
 
@@ -137,6 +138,45 @@ def get_as_df(type_: str,
         return _to_dataframe(_get_from_request(token, id_, type_), include_row_id, include_parent_id)
     elif obj:
         return _to_dataframe(obj.to_dict(), include_row_id, include_parent_id)
+
+
+def get_column_ids(type_: str,
+              *,
+              token: str = None,
+              id_: int = None,
+              sheet_obj: Any = None) -> dict:
+    """
+    Get the Column ids from a Smartsheet Sheet
+
+    :param type_: type of object to get. Must be one of 'report' or 'sheet'
+    :param token: Smartsheet personal authentication token
+    :param id_: Smartsheet object ID
+    :param sheet_obj: Smartsheet SDK object
+
+    :return: Dictionary with the column Titles and Ids
+    """
+
+    if type_.upper() != 'SHEET':
+        raise ValueError("type_ must be 'sheet'")
+	    
+    if not (token or sheet_obj):
+        raise ValueError("missing 1 required keyword-only argument: 'token' or 'sheet_obj'")
+
+    if isinstance(sheet_obj, smartsheet.models.sheet.Sheet):
+        return _map_column_ids(sheet_obj.to_dict())
+
+    if token and not id_:
+        raise ValueError("missing 1 required keyword-only argument: id_")
+    
+    if isinstance(token, str) and isinstance(id_, int):
+        return _map_column_ids(_get_from_request(token, id_, type_))
+    else:
+        raise ValueError("Invalid input. token: str, id_: int, sheet_obj: SDK Sheet Object")
+
+
+def _map_column_ids(object_dict: dict) -> dict:
+    sh_columns = object_dict['columns']
+    return {column['title']: column['id'] for column in sh_columns}
 
 
 def _get_from_request(token: str, id_: int, type_: str) -> dict:
