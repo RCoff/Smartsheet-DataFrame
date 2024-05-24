@@ -7,3 +7,4 @@ build/
 *.log
 config.py
 dev.py
+*.pypirc
