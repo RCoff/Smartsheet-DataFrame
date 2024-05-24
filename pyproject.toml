@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smartsheet-dataframe"
+version = "0.3.0"
+authors = [
+    { name = "Ridge Coffman", email = "coffman.ridge@gmail.com" },
+]
+description = "Converts Smartsheet sheets and reports to a Pandas DataFrame"
+readme = "README.md"
+requires-python = ">=3.6.5"
+license = { text = "MIT" }
+classifiers = [
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.6",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Office/Business :: Financial :: Spreadsheet",
+]
+dependencies = [
+    "pandas>=1.1.0",
+    "requests>=2.20.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/RCoff/Smartsheet-DataFrame"
+Issues = "https://github.com/RCoff/Smartsheet-DataFrame/issues"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
