@@ -1,11 +1,21 @@
-import smartsheet
+# Standard Imports
 import unittest
-import config
-from src.smartsheet_dataframe import get_report_as_df, get_sheet_as_df, get_as_df
+
+# 3rd-Party Imports
+import smartsheet
+
+# Local Imports
+from src.smartsheet_dataframe import (
+    get_report_as_df,
+    get_sheet_as_df,
+    get_as_df
+)
 
 
-class SheetTests(unittest.TestCase):
+@unittest.skip("Not testing API calls at this time")
+class TestSheet(unittest.TestCase):
     def setUp(self):
+        import config
         self.token = config.smartsheet_access_token
         self.sheet_id = config.sheet_id
         self.report_id = config.report_id
@@ -31,8 +41,10 @@ class SheetTests(unittest.TestCase):
         self.assertTrue(df1.to_dict() == df2.to_dict())
 
 
-class ReportTests(unittest.TestCase):
+@unittest.skip("Not testing API calls at this time")
+class TestReport(unittest.TestCase):
     def setUp(self):
+        import config
         self.token = config.smartsheet_access_token
         self.report_id = config.report_id
         self.sheet_client = smartsheet.Smartsheet(self.token)
