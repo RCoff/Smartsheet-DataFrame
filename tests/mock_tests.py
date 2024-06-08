@@ -128,6 +128,28 @@ class TestGetAsDf(unittest.TestCase):
         self.assertIn("Column2", df.columns)
         self.assertEqual(df.loc[0, "Column1"], "Value1")
 
+    def test_get_as_df_with_sheet_obj(self):
+        mock_sheet_obj = Mock()
+        mock_sheet_obj.to_dict.return_value = {
+            "columns": [{"title": "Column1"}, {"title": "Column2"}],
+            "rows": [{"id": 1, "cells": [{"value": "Value1"}, {"value": "Value2"}]}]
+        }
+
+        df = get_as_df(type_="sheet", obj=mock_sheet_obj)
+
+        self.assertIsInstance(df, pd.DataFrame)
+        self.assertIn("Column1", df.columns)
+        self.assertIn("Column2", df.columns)
+        self.assertEqual(df.loc[0, "Column1"], "Value1")
+
+    def test_get_as_df_without_token_or_obj(self):
+        with self.assertRaises(ValueError) as context:
+            get_as_df(type_="test")
+
+    def test_get_as_df_token_without_id(self):
+        with self.assertRaises(ValueError) as context:
+            get_as_df(type_="test", token="test")
+
 
 class TestDoRequest(unittest.TestCase):
 
