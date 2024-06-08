@@ -20,7 +20,7 @@ jobs:
 
       - name: Install build tools
         run: |
-          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade pip --force
           pip3 install -U setuptools
           pip3 install build twine wheel
           pip3 install -U pkginfo
