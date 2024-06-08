@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "smartsheet-dataframe"
-version = "0.3.2"
+version = "0.3.3"
 authors = [
     { name = "Ridge Coffman", email = "coffman.ridge@gmail.com" },
 ]
@@ -33,3 +33,9 @@ package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.coverage.run]
+omit = [
+    "config.py",
+    "dev.py",
+]

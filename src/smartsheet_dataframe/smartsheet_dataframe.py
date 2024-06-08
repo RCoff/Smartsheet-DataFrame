@@ -63,7 +63,9 @@ def get_report_as_df(token: str = None,
             if isinstance(token, smartsheet.models.sheet.Sheet):
                 raise ValueError("Function must be called with the 'report_obj=' keyword argument")
         except ModuleNotFoundError:
-            raise ValueError("A report_id must be included in the parameters if a token is provided")
+            pass
+
+        raise ValueError("A report_id must be included in the parameters if a token is provided")
 
     if report_obj and report_id:
         warnings.warn("A 'report_id' has been provided along with a 'report_obj' \n" +
@@ -115,7 +117,9 @@ def get_sheet_as_df(token: str = None,
             if isinstance(token, smartsheet.models.sheet.Sheet):
                 raise ValueError("Function must be called with the 'sheet_obj=' keyword argument")
         except ModuleNotFoundError:
-            raise ValueError("A sheet_id must be included in the parameters if a token is provided")
+            pass
+
+        raise ValueError("A sheet_id must be included in the parameters if a token is provided")
 
     if sheet_obj and sheet_id:
         warnings.warn("A 'sheet_id' has been provided along with a 'sheet_obj' \n" +
