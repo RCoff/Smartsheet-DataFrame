@@ -13,7 +13,7 @@ from src.smartsheet_dataframe import (
 )
 
 
-class SheetTests(unittest.TestCase):
+class TestSheet(unittest.TestCase):
     def setUp(self):
         self.token = config.smartsheet_access_token
         self.sheet_id = config.sheet_id
@@ -40,7 +40,7 @@ class SheetTests(unittest.TestCase):
         self.assertTrue(df1.to_dict() == df2.to_dict())
 
 
-class ReportTests(unittest.TestCase):
+class TestReport(unittest.TestCase):
     def setUp(self):
         self.token = config.smartsheet_access_token
         self.report_id = config.report_id
