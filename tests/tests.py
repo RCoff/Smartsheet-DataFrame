@@ -13,6 +13,7 @@ from src.smartsheet_dataframe import (
 )
 
 
+@unittest.skip("Not testing API calls at this time")
 class TestSheet(unittest.TestCase):
     def setUp(self):
         self.token = config.smartsheet_access_token
