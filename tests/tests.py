@@ -5,7 +5,6 @@ import unittest
 import smartsheet
 
 # Local Imports
-# import config
 from src.smartsheet_dataframe import (
     get_report_as_df,
     get_sheet_as_df,
@@ -16,6 +15,7 @@ from src.smartsheet_dataframe import (
 @unittest.skip("Not testing API calls at this time")
 class TestSheet(unittest.TestCase):
     def setUp(self):
+        import config
         self.token = config.smartsheet_access_token
         self.sheet_id = config.sheet_id
         self.report_id = config.report_id
@@ -41,8 +41,10 @@ class TestSheet(unittest.TestCase):
         self.assertTrue(df1.to_dict() == df2.to_dict())
 
 
+@unittest.skip("Not testing API calls at this time")
 class TestReport(unittest.TestCase):
     def setUp(self):
+        import config
         self.token = config.smartsheet_access_token
         self.report_id = config.report_id
         self.sheet_client = smartsheet.Smartsheet(self.token)
