@@ -1,7 +1,16 @@
-import smartsheet
+# Standard Imports
 import unittest
+
+# 3rd-Party Imports
+import smartsheet
+
+# Local Imports
 import config
-from src.smartsheet_dataframe import get_report_as_df, get_sheet_as_df, get_as_df
+from src.smartsheet_dataframe import (
+    get_report_as_df,
+    get_sheet_as_df,
+    get_as_df
+)
 
 
 class SheetTests(unittest.TestCase):
