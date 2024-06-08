@@ -1,6 +1,6 @@
 """
 Smartsheet-DataFrame
-####################
+...
 
 This package contains functions to retrieve Smartsheet
 reports and sheets as a Pandas DataFrame
@@ -17,6 +17,9 @@ import time
 # 3rd-Party Imports
 import pandas as pd
 
+# Local Imports
+from .exceptions import AuthenticationError
+
 logger = logging.getLogger(__name__)
 
 
@@ -29,14 +32,26 @@ def get_report_as_df(token: str = None,
     Get a Smartsheet report as a Pandas DataFrame
 
     :param token: Smartsheet Personal Access Token
+    :type token: str
+
     :param report_id: ID of report to retrieve
+    :type report_id: int
+
     :param include_row_id: If True, will append a 'row_id' column to the dataframe
             and populate with row id for each row in sheet
+    :type include_row_id: bool
+
     :param include_parent_id: If True, will append a 'parent_id' column to the
             dataframe and populat with parent ID for each nested row
+    :type include_parent_id: bool
+
     :param report_obj: Smartsheet Python SDK Report object
+        Should not be included if token and id_ are provided.
+        If both token and id_, and obj are provided, obj will be ignored
+    :type report_obj: Any
 
     :return: Pandas DataFrame with report data
+    :rtype: pd.DataFrame
     """
 
     if not (token or report_obj):
@@ -51,8 +66,8 @@ def get_report_as_df(token: str = None,
             raise ValueError("A report_id must be included in the parameters if a token is provided")
 
     if report_obj and report_id:
-        logger.warning("A 'report_id' has been provided along with a 'report_obj' \n" +
-                       "The 'sheet_id' parameter will be ignored")
+        warnings.warn("A 'report_id' has been provided along with a 'report_obj' \n" +
+                      "The 'sheet_id' parameter will be ignored")
 
     if token and report_id:
         return _to_dataframe(_get_from_request(token, report_id, type_="REPORT"), include_row_id, include_parent_id)
@@ -69,14 +84,26 @@ def get_sheet_as_df(token: str = None,
     Get a Smartsheet sheet as a Pandas DataFrame
 
     :param token: Smartsheet personal authentication token
+    :type token: str
+
     :param sheet_id: Smartsheet source sheet ID to get
+    :type sheet_id: int
+
     :param include_row_id: If True, will append a 'row_id' column to the dataframe
             and populate with row id for each row in sheet
+    :type include_row_id: bool
+
     :param include_parent_id: If True, will append a 'parent_id' column to the
             dataframe and populat with parent ID for each nested row
+    :type include_parent_id: bool
+
     :param sheet_obj: Smartsheet Python SDK sheet object
+        Should not be included if token and id_ are provided.
+        If both token and id_, and obj are provided, obj will be ignored
+    :type sheet_obj: Any
 
     :return: Pandas DataFrame with sheet data
+    :rtype: pd.DataFrame
     """
 
     if not (token or sheet_obj):
@@ -91,8 +118,8 @@ def get_sheet_as_df(token: str = None,
             raise ValueError("A sheet_id must be included in the parameters if a token is provided")
 
     if sheet_obj and sheet_id:
-        logger.warning("A 'sheet_id' has been provided along with a 'sheet_obj' \n" +
-                       "The 'sheet_id' parameter will be ignored")
+        warnings.warn("A 'sheet_id' has been provided along with a 'sheet_obj' \n" +
+                      "The 'sheet_id' parameter will be ignored")
 
     if token and sheet_id:
         return _to_dataframe(_get_from_request(token, sheet_id, type_="SHEET"), include_row_id, include_parent_id)
@@ -110,15 +137,29 @@ def get_as_df(type_: str,
     Get a Smartsheet report or sheet as a Pandas DataFrame
 
     :param type_: type of object to get. Must be one of 'report' or 'sheet'
+    :type type_: str
+
     :param token: Smartsheet personal authentication token
-    :param id_: Smartsheet object ID
-    :param obj: Smartsheet SDK object
+    :type token: str
+
+    :param id_: Smartsheet object (report or sheet) ID
+    :type id_: int
+
+    :param obj: Smartsheet Python SDK report or sheet object
+        Should not be included if token and id_ are provided.
+        If both token and id_, and obj are provided, obj will be ignored
+    :type obj: Any
+
     :param include_row_id: If True, will append a 'row_id' column to the dataframe
             and populate with row id for each row in sheet
+    :type include_row_id: bool
+
     :param include_parent_id: If True, will append a 'parent_id' column to the
-            dataframe and populat with parent ID for each nested row
+            dataframe and populate with parent ID for each nested row
+    :type include_parent_id: bool
 
     :return: Pandas DataFrame with object data
+    :rtype: pd.DataFrame
     """
     if not (token or obj):
         raise ValueError("One of 'token' or 'obj' must be included in parameters")
@@ -132,8 +173,8 @@ def get_as_df(type_: str,
             raise ValueError("A sheet_id must be included in the parameters if a token is provided")
 
     if obj and id_:
-        logger.warning("An 'id' has been provided along with a 'obj' \n" +
-                       "The 'id' parameter will be ignored")
+        warnings.warn("An 'id' has been provided along with a 'obj' \n" +
+                      "The 'id' parameter will be ignored")
 
     if token and id_:
         return _to_dataframe(_get_from_request(token, id_, type_), include_row_id, include_parent_id)
@@ -153,7 +194,6 @@ def _get_from_request(token: str, id_: int, type_: str) -> dict:
                                                       'url': url,
                                                       'object_Type': 'report'})
     else:
-        url = None
         raise ValueError(f"'type_' parameter must be one of SHEET or REPORT. The current value is {type_.upper()}")
 
     credentials: dict = {"Authorization": f"Bearer {token}"}
@@ -197,6 +237,22 @@ def _to_dataframe(object_dict: dict, include_row_id: bool = True, include_parent
 
 
 def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
+    """
+    Do the HTTP request, handling rate limit retrying
+
+    :param url: Smartsheet API URL
+    :type url: str
+
+    :param options: API request headers
+    :type options: dict
+
+    :param retries: Number of retries
+    :type retries: int
+
+    :return: Requests response object
+    :rtype: requests.Response
+    """
+
     i = 0
     for i in range(retries):
         try:
@@ -219,7 +275,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
         except AuthenticationError:
             logger.exception("Smartsheet returned an error status code")
             break
-        except:
+        except Exception:
             logger.exception(f"Not able to retrieve get response. Retrying... {i}")
             time.sleep(5 + (i * 5))
             continue
@@ -236,7 +292,3 @@ def _handle_object_value(object_value: dict) -> str:
         email_list_string = ', '.join(obj['email'] for obj in object_value['values'])
 
     return email_list_string
-
-
-class AuthenticationError(Exception):
-    pass
