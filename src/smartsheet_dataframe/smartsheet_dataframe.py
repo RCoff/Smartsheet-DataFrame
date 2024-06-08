@@ -7,13 +7,15 @@ reports and sheets as a Pandas DataFrame
 
 """
 
-import pandas as pd
-import requests
+# Standard Imports
 from typing import Any
+import requests
 import logging
 import warnings
 import time
 
+# 3rd-Party Imports
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -169,11 +171,11 @@ def _to_dataframe(object_dict: dict, include_row_id: bool = True, include_parent
         columns_list.insert(0, "row_id")
 
     rows_list = []
-    
-	# Handle empty sheet condition
+
+    # Handle empty sheet condition
     if not object_dict.get('rows', None):
         return pd.DataFrame(columns=columns_list)
-    
+
     for row in object_dict['rows']:
         cells_list = []
         if include_row_id:
