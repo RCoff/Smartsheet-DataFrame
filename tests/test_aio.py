@@ -8,6 +8,11 @@ try:
 except ImportError:
     from unittest.mock import Mock
 
+try:
+    from unittest import IsolatedAsyncioTestCase as AsyncTestCase
+except ImportError:
+    from unittest import TestCase as AsyncTestCase
+
 # 3rd-Party Imports
 import pandas as pd
 import smartsheet
@@ -24,9 +29,9 @@ from src.smartsheet_dataframe.aio import (
 load_dotenv()
 
 
-class TestGetReportAsDf(unittest.TestCase):
+class TestGetReportAsDf(AsyncTestCase):
 
-    @patch('src.smartsheet_dataframe.aio._get_from_request')
+    @patch('src.smartsheet_dataframe.aio._async_get_from_request')
     async def test_get_report_as_df_with_token_and_report_id(self, mock_get_from_request):
         mock_response = {
             "columns": [{"title": "Column1"}, {"title": "Column2"}],
@@ -42,7 +47,7 @@ class TestGetReportAsDf(unittest.TestCase):
         self.assertEqual(df.loc[0, "Column1"], "Value1")
 
     @patch('warnings.warn')
-    @patch('src.smartsheet_dataframe.aio._get_from_request')
+    @patch('src.smartsheet_dataframe.aio._async_get_from_request')
     async def test_get_report_as_df_with_both_token_and_report_obj(self, mock_get_from_request, mock_warn):
         mock_response = {
             "columns": [{"title": "Column1"}, {"title": "Column2"}],
@@ -71,8 +76,8 @@ class TestGetReportAsDf(unittest.TestCase):
             await get_report_as_df(token="test")
 
 
-class TestGetSheetAsDf(unittest.TestCase):
-    @patch('src.smartsheet_dataframe.aio._get_from_request')
+class TestGetSheetAsDf(AsyncTestCase):
+    @patch('src.smartsheet_dataframe.aio._async_get_from_request')
     async def test_get_sheet_as_df_with_token_and_sheet_id(self, mock_get_from_request):
         mock_response = {
             "columns": [{"title": "Column1"}, {"title": "Column2"}],
@@ -117,7 +122,7 @@ class TestGetSheetAsDf(unittest.TestCase):
             await get_sheet_as_df(token="test")
 
 
-class TestGetAsDf(unittest.TestCase):
+class TestGetAsDf(AsyncTestCase):
 
     async def test_get_as_df_with_report_obj(self):
         mock_report_obj = Mock()
@@ -156,7 +161,7 @@ class TestGetAsDf(unittest.TestCase):
             await get_as_df(type_="test", token="test")
 
 
-class TestDoRequest(unittest.TestCase):
+class TestDoRequest(AsyncTestCase):
 
     @patch('src.smartsheet_dataframe.aio.aiohttp.ClientSession.get')
     async def test_do_request_success(self, mock_get):
@@ -172,11 +177,11 @@ class TestDoRequest(unittest.TestCase):
     @patch('src.smartsheet_dataframe.aio.aiohttp.ClientSession.get')
     async def test_do_request_rate_limit(self, mock_get):
         mock_response_rate_limit = Mock()
-        mock_response_rate_limit.status_code = 429
+        mock_response_rate_limit.status = 429
         mock_response_rate_limit.json.return_value = {"errorCode": 4004}
 
         mock_response_success = Mock()
-        mock_response_success.status_code = 200
+        mock_response_success.status = 200
         mock_response_success.json.return_value = {"data": "some_data"}
 
         mock_get.side_effect = [mock_response_rate_limit] * 3 + [mock_response_success]
@@ -188,7 +193,7 @@ class TestDoRequest(unittest.TestCase):
     @patch('src.smartsheet_dataframe.aio.aiohttp.ClientSession.get')
     async def test_do_request_rate_limit_failure(self, mock_get):
         mock_response_rate_limit = Mock()
-        mock_response_rate_limit.status_code = 429
+        mock_response_rate_limit.status = 429
         mock_response_rate_limit.json.return_value = {"errorCode": 4004}
 
         mock_get.return_value = mock_response_rate_limit
@@ -200,7 +205,7 @@ class TestDoRequest(unittest.TestCase):
 
 
 @unittest.skipIf(bool(os.getenv('skip_tests', "true") == "true"), "Not testing API calls at this time")
-class SheetAPICallsTest(unittest.IsolatedAsyncioTestCase):
+class SheetAPICallsTest(AsyncTestCase):
     def setUp(self):
         import config
         self.token = config.smartsheet_access_token
@@ -225,7 +230,7 @@ class SheetAPICallsTest(unittest.IsolatedAsyncioTestCase):
 
 
 @unittest.skipIf(bool(os.getenv('skip_tests', "true") == "true"), "Not testing API calls at this time")
-class ReportAPICallsTest(unittest.IsolatedAsyncioTestCase):
+class ReportAPICallsTest(AsyncTestCase):
     def setUp(self):
         import config
         self.token = config.smartsheet_access_token
