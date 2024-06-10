@@ -93,7 +93,7 @@ class TestGetSheetAsDf(AsyncTestCase):
         self.assertEqual(df.loc[0, "Column1"], "Value1")
 
     @patch('warnings.warn')
-    @patch('src.smartsheet_dataframe.smartsheet_dataframe._get_from_request')
+    @patch('src.smartsheet_dataframe.aio._async_get_from_request')
     async def test_get_sheet_as_df_with_both_token_and_sheet_obj(self, mock_get_from_request, mock_warn):
         mock_response = {
             "columns": [{"title": "Column1"}, {"title": "Column2"}],
@@ -125,7 +125,7 @@ class TestGetSheetAsDf(AsyncTestCase):
 class TestGetAsDf(AsyncTestCase):
 
     async def test_get_as_df_with_report_obj(self):
-        mock_report_obj = Mock()
+        mock_report_obj = unittest.mock.Mock()
         mock_report_obj.to_dict.return_value = {
             "columns": [{"title": "Column1"}, {"title": "Column2"}],
             "rows": [{"id": 1, "cells": [{"value": "Value1"}, {"value": "Value2"}]}]
@@ -139,7 +139,7 @@ class TestGetAsDf(AsyncTestCase):
         self.assertEqual(df.loc[0, "Column1"], "Value1")
 
     async def test_get_as_df_with_sheet_obj(self):
-        mock_sheet_obj = Mock()
+        mock_sheet_obj = unittest.mock.Mock()
         mock_sheet_obj.to_dict.return_value = {
             "columns": [{"title": "Column1"}, {"title": "Column2"}],
             "rows": [{"id": 1, "cells": [{"value": "Value1"}, {"value": "Value2"}]}]
@@ -166,19 +166,20 @@ class TestDoRequest(AsyncTestCase):
     @patch('src.smartsheet_dataframe.aio.aiohttp.ClientSession.get')
     async def test_do_request_success(self, mock_get):
         mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {"data": "some_data"}
         mock_get.return_value = mock_response
+        mock_get.return_value.__aenter__.return_value.status = 200
+        mock_get.return_value.__aenter__.return_value.json.return_value = {"data": "some_data"}
 
         response = await _async_do_request(url="http://fakeurl.com", options={})
 
-        self.assertEqual(response.json(), {"data": "some_data"})
+        self.assertEqual(await response.json(), {"data": "some_data"})
 
     @patch('src.smartsheet_dataframe.aio.aiohttp.ClientSession.get')
     async def test_do_request_rate_limit(self, mock_get):
         mock_response_rate_limit = Mock()
         mock_response_rate_limit.status = 429
         mock_response_rate_limit.json.return_value = {"errorCode": 4004}
+        mock_response_rate_limit.text.return_value = "some_data"
 
         mock_response_success = Mock()
         mock_response_success.status = 200
@@ -195,6 +196,7 @@ class TestDoRequest(AsyncTestCase):
         mock_response_rate_limit = Mock()
         mock_response_rate_limit.status = 429
         mock_response_rate_limit.json.return_value = {"errorCode": 4004}
+        mock_response_rate_limit.text.return_value = "some text"
 
         mock_get.return_value = mock_response_rate_limit
 
