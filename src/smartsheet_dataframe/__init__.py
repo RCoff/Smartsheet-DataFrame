@@ -3,3 +3,9 @@ from .smartsheet_dataframe import (
     get_report_as_df,
     get_sheet_as_df
 )
+
+from .aio import (
+    get_as_df,
+    get_report_as_df,
+    get_sheet_as_df
+)
