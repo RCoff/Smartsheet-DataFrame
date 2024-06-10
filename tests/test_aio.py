@@ -197,8 +197,8 @@ class TestDoRequest(unittest.TestCase):
         self.assertTrue('Could not retrieve request after retrying' in str(context.exception))
 
 
-@unittest.skipIf(bool(os.getenv('skip_tests', "true") == "true"), "Not testing API calls at this time")
-class SheetAPICallsTest(unittest.TestCase):
+# @unittest.skipIf(bool(os.getenv('skip_tests', "true") == "true"), "Not testing API calls at this time")
+class SheetAPICallsTest(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         import config
         self.token = config.smartsheet_access_token
@@ -211,9 +211,19 @@ class SheetAPICallsTest(unittest.TestCase):
 
         self.assertTrue(df1.to_dict() == df2.to_dict())
 
+    async def test_get_sheet_as_df(self):
+        df = await get_sheet_as_df(token=self.token, sheet_id=self.sheet_id)
+
+        self.assertEqual(df["Primary Column"].iloc[0], "This is a row in the sheet")
+
+    async def test_get_as_df(self):
+        df = await get_as_df(type_="sheet", token=self.token, id_=self.sheet_id)
+
+        self.assertEqual(df["Primary Column"].iloc[0], "This is a row in the sheet")
+
 
 @unittest.skipIf(bool(os.getenv('skip_tests', "true") == "true"), "Not testing API calls at this time")
-class ReportAPICallsTest(unittest.TestCase):
+class ReportAPICallsTest(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         import config
         self.token = config.smartsheet_access_token
@@ -224,6 +234,16 @@ class ReportAPICallsTest(unittest.TestCase):
         df2 = await get_as_df(type_='report', token=self.token, id_=self.report_id)
 
         self.assertTrue(df1.to_dict() == df2.to_dict())
+
+    async def test_get_report_as_df(self):
+        df = await get_report_as_df(token=self.token, report_id=self.report_id)
+
+        self.assertEqual(df["Primary"].iloc[0], "This is a row in the sheet")
+
+    async def test_get_as_df(self):
+        df = await get_as_df(type_='report', token=self.token, id_=self.report_id)
+
+        self.assertEqual(df["Primary"].iloc[0], "This is a row in the sheet")
 
 
 if __name__ == "__main__":
