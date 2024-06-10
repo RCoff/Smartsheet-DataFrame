@@ -1,10 +1,12 @@
 # Standard Imports
 import os
 import unittest
-from unittest.mock import (
-    patch,
-    AsyncMock as Mock
-)
+from unittest.mock import patch
+
+try:
+    from unittest.mock import AsyncMock as Mock
+except ImportError:
+    from unittest.mock import Mock
 
 # 3rd-Party Imports
 import pandas as pd
