@@ -197,7 +197,7 @@ class TestDoRequest(unittest.TestCase):
         self.assertTrue('Could not retrieve request after retrying' in str(context.exception))
 
 
-# @unittest.skipIf(bool(os.getenv('skip_tests', "true") == "true"), "Not testing API calls at this time")
+@unittest.skipIf(bool(os.getenv('skip_tests', "true") == "true"), "Not testing API calls at this time")
 class SheetAPICallsTest(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         import config
