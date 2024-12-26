@@ -28,6 +28,9 @@ dependencies = [
 Homepage = "https://github.com/RCoff/Smartsheet-DataFrame"
 Issues = "https://github.com/RCoff/Smartsheet-DataFrame/issues"
 
+[tool.ruff]
+exclude = ["tests"]
+
 [tool.setuptools]
 package-dir = { "" = "src" }
 
