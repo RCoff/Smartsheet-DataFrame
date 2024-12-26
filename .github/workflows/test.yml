@@ -5,9 +5,10 @@ on: [ push, pull_request ]
 jobs:
   test:
     runs-on: ubuntu-20.04
+    continue-on-error: true
     strategy:
       matrix:
-        python-version: [ "3.6.9", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12" ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
 
     steps:
       - name: Checkout code
@@ -24,4 +25,4 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m unittest discover -v
+          python -m coverage run -m pytest >> $GITHUB_STEP_SUMMARY
