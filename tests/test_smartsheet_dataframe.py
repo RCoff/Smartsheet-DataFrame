@@ -7,16 +7,75 @@ from unittest.mock import (
 
 # 3rd-Party Imports
 import pandas as pd
-import smartsheet.sheets
+import smartsheet
 
 # Local Imports
-from src.smartsheet_dataframe.smartsheet_dataframe import (
+from src.smartsheet_dataframe import (
     get_report_as_df,
     get_sheet_as_df,
     get_as_df,
+)
+from src.smartsheet_dataframe.smartsheet_dataframe import (
     _do_request,
     _to_dataframe
 )
+
+
+@unittest.skip("Not testing API calls at this time")
+class TestSheet(unittest.TestCase):
+    def setUp(self):
+        import config
+        self.token = config.smartsheet_access_token
+        self.sheet_id = config.sheet_id
+        self.report_id = config.report_id
+        self.sheet_client = smartsheet.Smartsheet(self.token)
+        self.sheet_obj = self.sheet_client.Sheets.get_sheet(self.sheet_id, include=['objectValue'], level=1)
+
+    def test_object_and_request_are_equal(self):
+        df1 = get_sheet_as_df(token=self.token, sheet_id=self.sheet_id)
+        df2 = get_sheet_as_df(sheet_obj=self.sheet_obj)
+
+        self.assertTrue(df1.to_dict() == df2.to_dict())
+
+    def test_generic_vs_specific_requests(self):
+        df1 = get_sheet_as_df(token=self.token, sheet_id=self.sheet_id)
+        df2 = get_as_df(type_='sheet', token=self.token, id_=self.sheet_id)
+
+        self.assertTrue(df1.to_dict() == df2.to_dict())
+
+    def test_generic_vs_specific_object(self):
+        df1 = get_sheet_as_df(sheet_obj=self.sheet_obj)
+        df2 = get_as_df(type_='sheet', obj=self.sheet_obj)
+
+        self.assertTrue(df1.to_dict() == df2.to_dict())
+
+
+@unittest.skip("Not testing API calls at this time")
+class TestReport(unittest.TestCase):
+    def setUp(self):
+        import config
+        self.token = config.smartsheet_access_token
+        self.report_id = config.report_id
+        self.sheet_client = smartsheet.Smartsheet(self.token)
+        self.report_obj = self.sheet_client.Reports.get_report(self.report_id)
+
+    def test_report_object_and_request_are_equal(self):
+        df1 = get_report_as_df(token=self.token, report_id=self.report_id)
+        df2 = get_report_as_df(report_obj=self.report_obj)
+
+        self.assertTrue(df1.to_dict() == df2.to_dict())
+
+    def test_generic_vs_specific_requests(self):
+        df1 = get_report_as_df(token=self.token, report_id=self.report_id)
+        df2 = get_as_df(type_='report', token=self.token, id_=self.report_id)
+
+        self.assertTrue(df1.to_dict() == df2.to_dict())
+
+    def test_generic_vs_specific_object(self):
+        df1 = get_report_as_df(report_obj=self.report_obj)
+        df2 = get_as_df(type_='report', obj=self.report_obj)
+
+        self.assertTrue(df1.to_dict() == df2.to_dict())
 
 
 class TestGetReportAsDf(unittest.TestCase):
@@ -160,12 +219,15 @@ class TestDoRequest(unittest.TestCase):
         mock_response.json.return_value = {"data": "some_data"}
         mock_get.return_value = mock_response
 
-        response = _do_request(url="http://fakeurl.com", options={})
+        response = _do_request(url="https://fakeurl.com", options={})
 
         self.assertEqual(response.json(), {"data": "some_data"})
 
+    @patch("src.smartsheet_dataframe.smartsheet_dataframe.time")
     @patch('src.smartsheet_dataframe.smartsheet_dataframe.requests.get')
-    def test_do_request_rate_limit(self, mock_get):
+    def test_do_request_rate_limit(self, mock_get, mock_time):
+        mock_time.sleep.return_value = None
+
         mock_response_rate_limit = Mock()
         mock_response_rate_limit.status_code = 429
         mock_response_rate_limit.json.return_value = {"errorCode": 4004}
@@ -176,12 +238,15 @@ class TestDoRequest(unittest.TestCase):
 
         mock_get.side_effect = [mock_response_rate_limit] * 3 + [mock_response_success]
 
-        response = _do_request(url="http://fakeurl.com", options={}, retries=4)
+        response = _do_request(url="https://fakeurl.com", options={}, retries=4)
 
         self.assertEqual(response.json(), {"data": "some_data"})
 
+    @patch("src.smartsheet_dataframe.smartsheet_dataframe.time")
     @patch('src.smartsheet_dataframe.smartsheet_dataframe.requests.get')
-    def test_do_request_rate_limit_failure(self, mock_get):
+    def test_do_request_rate_limit_failure(self, mock_get, mock_time):
+        mock_time.sleep.return_value = None
+
         mock_response_rate_limit = Mock()
         mock_response_rate_limit.status_code = 429
         mock_response_rate_limit.json.return_value = {"errorCode": 4004}
@@ -189,7 +254,7 @@ class TestDoRequest(unittest.TestCase):
         mock_get.return_value = mock_response_rate_limit
 
         with self.assertRaises(Exception) as context:
-            _do_request(url="http://fakeurl.com", options={}, retries=3)
+            _do_request(url="https://fakeurl.com", options={}, retries=3)
 
         self.assertTrue('Could not retrieve request after retrying' in str(context.exception))
 
@@ -222,7 +287,3 @@ class TestToDataFrame(unittest.TestCase):
         self.assertIn("Column2", df.columns)
         self.assertEqual(df.loc[0, "Column1"], "Value1")
         self.assertEqual(df.loc[0, "Column2"], "Value2")
-
-
-if __name__ == '__main__':
-    unittest.main()
