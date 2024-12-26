@@ -28,6 +28,58 @@ dependencies = [
 Homepage = "https://github.com/RCoff/Smartsheet-DataFrame"
 Issues = "https://github.com/RCoff/Smartsheet-DataFrame/issues"
 
+[tool.isort]
+force_grid_wrap = 3
+include_trailing_comma = true
+multi_line_output = 3
+use_parentheses = true
+
+[tool.ruff]
+exclude = ["tests"]
+
+[tool.ruff.lint]
+extend-select = [
+    "A",
+    "ANN",
+    "ASYNC",
+    "B",
+    "BLE",
+    "C4",
+    "COM",
+    "D",
+    "DTZ",
+    "ERA",
+    "G",
+    "ICN",
+    "INP",
+    "LOG",
+    "N",
+    "PD",
+    "PIE",
+    "PLC",
+    "PLE",
+    "PLR",
+    "PTH",
+    "PYI",
+    "Q",
+    "S",
+    "T20",
+    "TC",
+    "UP",
+    "W",
+]
+extend-ignore = [
+    "ANN401",
+    "B028",
+    "D202",
+    "D203",
+    "D213",
+    "G0",
+    "PLR0913",
+    "PLR2004",
+    "S113",
+]
+
 [tool.setuptools]
 package-dir = { "" = "src" }
 
