@@ -1,10 +1,7 @@
-"""
-Smartsheet-DataFrame
-...
+"""Primary Smartsheet-DataFrame module.
 
 This package contains functions to retrieve Smartsheet
 reports and sheets as a Pandas DataFrame
-
 """
 
 # Standard Imports
@@ -28,8 +25,7 @@ def get_report_as_df(token: str = None,
                      include_row_id: bool = True,
                      include_parent_id: bool = True,
                      report_obj: Any = None) -> pd.DataFrame:
-    """
-    Get a Smartsheet report as a Pandas DataFrame
+    """Get a Smartsheet report as a Pandas DataFrame.
 
     :param token: Smartsheet Personal Access Token
     :type token: str
@@ -53,7 +49,6 @@ def get_report_as_df(token: str = None,
     :return: Pandas DataFrame with report data
     :rtype: pd.DataFrame
     """
-
     if not (token or report_obj):
         raise ValueError("One of 'token' or 'report_obj' must be included in parameters")
 
@@ -82,8 +77,7 @@ def get_sheet_as_df(token: str = None,
                     include_row_id: bool = True,
                     include_parent_id: bool = True,
                     sheet_obj: Any = None) -> pd.DataFrame:
-    """
-    Get a Smartsheet sheet as a Pandas DataFrame
+    """Get a Smartsheet sheet as a Pandas DataFrame.
 
     :param token: Smartsheet personal authentication token
     :type token: str
@@ -137,8 +131,7 @@ def get_as_df(type_: str,
               obj: Any = None,
               include_row_id: bool = True,
               include_parent_id: bool = True) -> pd.DataFrame:
-    """
-    Get a Smartsheet report or sheet as a Pandas DataFrame
+    """Get a Smartsheet report or sheet as a Pandas DataFrame.
 
     :param type_: type of object to get. Must be one of 'report' or 'sheet'
     :type type_: str
@@ -191,14 +184,14 @@ def get_as_df(type_: str,
 def _get_from_request(token: str, id_: int, type_: str) -> dict:
     if type_.upper() == "SHEET":
         url = f"https://api.smartsheet.com/2.0/sheets/{id_}?include=objectValue&level=1"
-        logger.debug("Getting sheet request", extra={'id': id_,
-                                                     'url': url,
-                                                     'object_type': 'sheet'})
+        logger.debug("Getting sheet request", extra={"id": id_,
+                                                     "url": url,
+                                                     "object_type": "sheet"})
     elif type_.upper() == "REPORT":
         url = f"https://api.smartsheet.com/2.0/reports/{id_}?pageSize=50000"
-        logger.debug("Getting report request", extra={'id': id_,
-                                                      'url': url,
-                                                      'object_Type': 'report'})
+        logger.debug("Getting report request", extra={"id": id_,
+                                                      "url": url,
+                                                      "object_Type": "report"})
     else:
         raise ValueError(f"'type_' parameter must be one of SHEET or REPORT. The current value is {type_.upper()}")
 
@@ -209,7 +202,7 @@ def _get_from_request(token: str, id_: int, type_: str) -> dict:
 
 
 def _to_dataframe(object_dict: dict, include_row_id: bool = True, include_parent_id: bool = True) -> pd.DataFrame:
-    columns_list = [column['title'] for column in object_dict['columns']]
+    columns_list = [column["title"] for column in object_dict["columns"]]
 
     if include_parent_id:
         columns_list.insert(0, "parent_id")
@@ -219,23 +212,23 @@ def _to_dataframe(object_dict: dict, include_row_id: bool = True, include_parent
     rows_list = []
 
     # Handle empty sheet condition
-    if not object_dict.get('rows', None):
+    if not object_dict.get("rows", None):
         return pd.DataFrame(columns=columns_list)
 
-    for row in object_dict['rows']:
+    for row in object_dict["rows"]:
         cells_list = []
         if include_row_id:
-            cells_list.append(int(row['id']))
+            cells_list.append(int(row["id"]))
         if include_parent_id:
-            cells_list.append(int(row['parentId'])) if 'parentId' in row else cells_list.append('')
+            cells_list.append(int(row["parentId"])) if "parentId" in row else cells_list.append("")
 
-        for cell in row['cells']:
-            if 'value' in cell:
-                cells_list.append(cell['value'])
-            elif 'objectValue' in cell:
-                cells_list.append(_handle_object_value(cell['objectValue']))
+        for cell in row["cells"]:
+            if "value" in cell:
+                cells_list.append(cell["value"])
+            elif "objectValue" in cell:
+                cells_list.append(_handle_object_value(cell["objectValue"]))
             else:
-                cells_list.append('')
+                cells_list.append("")
         else:
             rows_list.append(cells_list)
 
@@ -243,8 +236,7 @@ def _to_dataframe(object_dict: dict, include_row_id: bool = True, include_parent
 
 
 def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
-    """
-    Do the HTTP request, handling rate limit retrying
+    """Do the HTTP request, handling rate limit retrying.
 
     :param url: Smartsheet API URL
     :type url: str
@@ -258,7 +250,6 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
     :return: Requests response object
     :rtype: requests.Response
     """
-
     i = 0
     for i in range(retries):
         try:
@@ -266,11 +257,11 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
             response_json = response.json()
 
             if response.status_code != 200:
-                if response_json['errorCode'] == 1002 or response_json['errorCode'] == 1003 or \
-                        response_json['errorCode'] == 1004:
+                if response_json["errorCode"] == 1002 or response_json["errorCode"] == 1003 or \
+                        response_json["errorCode"] == 1004:
                     raise AuthenticationError("Could not connect using the supplied auth token \n" +
                                               response.text)
-                elif response_json['errorCode'] == 4004:
+                elif response_json["errorCode"] == 4004:
                     logger.debug(f"Rate limit exceeded. Waiting and trying again... {i}")
                     time.sleep(5 + (i * 5))
                     continue
@@ -294,7 +285,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
 
 def _handle_object_value(object_value: dict) -> str:
     email_list_string: str = ""
-    if object_value['objectType'].upper() == "MULTI_CONTACT":
-        email_list_string = ', '.join(obj['email'] for obj in object_value['values'])
+    if object_value["objectType"].upper() == "MULTI_CONTACT":
+        email_list_string = ", ".join(obj["email"] for obj in object_value["values"])
 
     return email_list_string
