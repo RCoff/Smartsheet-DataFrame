@@ -8,14 +8,14 @@ reports and sheets as a Pandas DataFrame
 """
 
 # Standard Imports
-from typing import Any
-import requests
 import logging
-import warnings
 import time
+import warnings
+from typing import Any
 
 # 3rd-Party Imports
 import pandas as pd
+import requests
 
 # Local Imports
 from .exceptions import AuthenticationError

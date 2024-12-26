@@ -28,6 +28,12 @@ dependencies = [
 Homepage = "https://github.com/RCoff/Smartsheet-DataFrame"
 Issues = "https://github.com/RCoff/Smartsheet-DataFrame/issues"
 
+[tool.isort]
+force_grid_wrap = 3
+include_trailing_comma = true
+multi_line_output = 3
+use_parentheses = true
+
 [tool.ruff]
 exclude = ["tests"]
 
