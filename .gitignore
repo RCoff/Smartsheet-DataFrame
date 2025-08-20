@@ -8,3 +8,5 @@ build/
 config.py
 dev.py
 *.pypirc
+.env
+.coverage

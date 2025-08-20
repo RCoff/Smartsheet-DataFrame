@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "smartsheet-dataframe"
-version = "0.3.4"
+version = "0.3.5"
 authors = [
     { name = "Ridge Coffman", email = "coffman.ridge@gmail.com" },
 ]
