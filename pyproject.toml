@@ -91,3 +91,11 @@ omit = [
     "config.py",
     "dev.py",
 ]
+
+[dependency-groups]
+dev = [
+    "isort>=5.10.1",
+    "pytest>=7.0.1",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.0.17",
+]

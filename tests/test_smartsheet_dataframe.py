@@ -10,12 +10,12 @@ import pandas as pd
 import smartsheet
 
 # Local Imports
-from src.smartsheet_dataframe import (
+from smartsheet_dataframe import (
     get_report_as_df,
     get_sheet_as_df,
     get_as_df,
 )
-from src.smartsheet_dataframe.smartsheet_dataframe import (
+from smartsheet_dataframe.smartsheet_dataframe import (
     _do_request,
     _to_dataframe
 )
@@ -80,7 +80,7 @@ class TestReport(unittest.TestCase):
 
 class TestGetReportAsDf(unittest.TestCase):
 
-    @patch('src.smartsheet_dataframe.smartsheet_dataframe._get_from_request')
+    @patch('smartsheet_dataframe.smartsheet_dataframe._get_from_request')
     def test_get_report_as_df_with_token_and_report_id(self, mock_get_from_request):
         mock_response = {
             "columns": [{"title": "Column1"}, {"title": "Column2"}],
@@ -96,7 +96,7 @@ class TestGetReportAsDf(unittest.TestCase):
         self.assertEqual(df.loc[0, "Column1"], "Value1")
 
     @patch('warnings.warn')
-    @patch('src.smartsheet_dataframe.smartsheet_dataframe._get_from_request')
+    @patch('smartsheet_dataframe.smartsheet_dataframe._get_from_request')
     def test_get_report_as_df_with_both_token_and_report_obj(self, mock_get_from_request, mock_warn):
         mock_response = {
             "columns": [{"title": "Column1"}, {"title": "Column2"}],
@@ -126,7 +126,7 @@ class TestGetReportAsDf(unittest.TestCase):
 
 
 class TestGetSheetAsDf(unittest.TestCase):
-    @patch('src.smartsheet_dataframe.smartsheet_dataframe._get_from_request')
+    @patch('smartsheet_dataframe.smartsheet_dataframe._get_from_request')
     def test_get_sheet_as_df_with_token_and_sheet_id(self, mock_get_from_request):
         mock_response = {
             "columns": [{"title": "Column1"}, {"title": "Column2"}],
@@ -142,7 +142,7 @@ class TestGetSheetAsDf(unittest.TestCase):
         self.assertEqual(df.loc[0, "Column1"], "Value1")
 
     @patch('warnings.warn')
-    @patch('src.smartsheet_dataframe.smartsheet_dataframe._get_from_request')
+    @patch('smartsheet_dataframe.smartsheet_dataframe._get_from_request')
     def test_get_sheet_as_df_with_both_token_and_sheet_obj(self, mock_get_from_request, mock_warn):
         mock_response = {
             "columns": [{"title": "Column1"}, {"title": "Column2"}],
@@ -212,7 +212,7 @@ class TestGetAsDf(unittest.TestCase):
 
 class TestDoRequest(unittest.TestCase):
 
-    @patch('src.smartsheet_dataframe.smartsheet_dataframe.requests.get')
+    @patch('smartsheet_dataframe.smartsheet_dataframe.requests.get')
     def test_do_request_success(self, mock_get):
         mock_response = Mock()
         mock_response.status_code = 200
@@ -223,8 +223,8 @@ class TestDoRequest(unittest.TestCase):
 
         self.assertEqual(response.json(), {"data": "some_data"})
 
-    @patch("src.smartsheet_dataframe.smartsheet_dataframe.time")
-    @patch('src.smartsheet_dataframe.smartsheet_dataframe.requests.get')
+    @patch("smartsheet_dataframe.smartsheet_dataframe.time")
+    @patch('smartsheet_dataframe.smartsheet_dataframe.requests.get')
     def test_do_request_rate_limit(self, mock_get, mock_time):
         mock_time.sleep.return_value = None
 
@@ -242,8 +242,8 @@ class TestDoRequest(unittest.TestCase):
 
         self.assertEqual(response.json(), {"data": "some_data"})
 
-    @patch("src.smartsheet_dataframe.smartsheet_dataframe.time")
-    @patch('src.smartsheet_dataframe.smartsheet_dataframe.requests.get')
+    @patch("smartsheet_dataframe.smartsheet_dataframe.time")
+    @patch('smartsheet_dataframe.smartsheet_dataframe.requests.get')
     def test_do_request_rate_limit_failure(self, mock_get, mock_time):
         mock_time.sleep.return_value = None
 
