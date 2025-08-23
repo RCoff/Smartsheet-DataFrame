@@ -1610,6 +1610,21 @@ wheels = [
 ]
 
 [[package]]
+name = "requests-toolbelt"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests", version = "2.27.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.7'" },
+    { name = "requests", version = "2.31.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.7.*'" },
+    { name = "requests", version = "2.32.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.8.*'" },
+    { name = "requests", version = "2.32.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f3/61/d7545dafb7ac2230c70d38d31cbfe4cc64f7144dc41f6e4e4b78ecd9f5bb/requests-toolbelt-1.0.0.tar.gz", hash = "sha256:7681a0a3d047012b5bdc0ee37d7f8f07ebe76ab08caeccfc3921ce23c88d5bc6", size = 206888, upload-time = "2023-05-01T04:11:33.229Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3f/51/d4db610ef29373b879047326cbf6fa98b6c1969d6f6dc423279de2b1be2c/requests_toolbelt-1.0.0-py2.py3-none-any.whl", hash = "sha256:cccfdd665f0a24fcf4726e690f65639d272bb0637b9b92dfd91a5568ccf6bd06", size = 54481, upload-time = "2023-05-01T04:11:28.427Z" },
+]
+
+[[package]]
 name = "ruff"
 version = "0.0.17"
 source = { registry = "https://pypi.org/simple" }
@@ -1745,6 +1760,7 @@ dev = [
     { name = "pytest-cov", version = "6.2.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
     { name = "ruff", version = "0.0.17", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.7'" },
     { name = "ruff", version = "0.12.10", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.7'" },
+    { name = "smartsheet-python-sdk" },
 ]
 
 [package.metadata]
@@ -1759,6 +1775,27 @@ dev = [
     { name = "pytest", specifier = ">=7.0.1" },
     { name = "pytest-cov", specifier = ">=4.0.0" },
     { name = "ruff", specifier = ">=0.0.17" },
+    { name = "smartsheet-python-sdk", specifier = "==3.0.5" },
+]
+
+[[package]]
+name = "smartsheet-python-sdk"
+version = "3.0.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "certifi", version = "2025.4.26", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.7'" },
+    { name = "certifi", version = "2025.8.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.7'" },
+    { name = "python-dateutil" },
+    { name = "requests", version = "2.27.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.7'" },
+    { name = "requests", version = "2.31.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.7.*'" },
+    { name = "requests", version = "2.32.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.8.*'" },
+    { name = "requests", version = "2.32.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+    { name = "requests-toolbelt" },
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cc/dc/4d06d5c5e74427677036e730c983d9ba818a3cdb5be8e6a8e8ae842ab4e7/smartsheet-python-sdk-3.0.5.tar.gz", hash = "sha256:2725192db1eb8121b6a4969fa9d213c54c6a8c5823cb6bbbc64f7b48239507a5", size = 335980, upload-time = "2025-04-08T12:15:49.588Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ed/22/174eed88f8b3b5a6a0b2daca8e68a641d7c489d6852896ba927d0fadedbc/smartsheet_python_sdk-3.0.5-py2.py3-none-any.whl", hash = "sha256:339df23a98789a14ab75756c7916a3b21870a7d2ddbe853f302cc4b437fe8863", size = 229708, upload-time = "2025-04-08T12:15:48.251Z" },
 ]
 
 [[package]]
