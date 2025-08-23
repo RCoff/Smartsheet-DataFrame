@@ -4,21 +4,19 @@ on: [ push, pull_request ]
 
 jobs:
   lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set uv & Python ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.10"
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements-dev.txt
+        run: uv sync --locked --all-extras --dev
 
       - name: Lint
-        run: |
-          python -m ruff check >> $GITHUB_STEP_SUMMARY
+        run: uv run ruff check >> $GITHUB_STEP_SUMMARY
