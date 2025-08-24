@@ -53,9 +53,6 @@ def get_report_as_df(token: Optional[str] = None,
     :rtype: pd.DataFrame
     """
 
-    if not (token or report_obj):
-        raise ValueError("One of 'token' or 'report_obj' must be included in parameters")
-
     if token and not report_id:
         try:
             import smartsheet.models  # noqa: PLC0415
@@ -107,9 +104,6 @@ def get_sheet_as_df(token: Optional[str] = None,
     :return: Pandas DataFrame with sheet data
     :rtype: pd.DataFrame
     """
-
-    if not (token or sheet_obj):
-        raise ValueError("One of 'token' or 'sheet_obj' must be included in parameters")
 
     if token and not sheet_id:
         try:
@@ -215,6 +209,23 @@ def _get_from_request(token: str, id_: int, type_: str) -> dict:
 def _to_dataframe(object_dict: dict,
                   include_row_id: bool = True,
                   include_parent_id: bool = True) -> pd.DataFrame:
+    """Convert a Smartsheet object dictionary to a Pandas DataFrame.
+
+    :param object_dict: Smartsheet object dictionary
+    :type object_dict: dict
+
+    :param include_row_id: If True, will append a 'row_id' column to the dataframe
+            and populate with row id for each row in sheet
+    :type include_row_id: bool
+
+    :param include_parent_id: If True, will append a 'parent_id' column to the
+            dataframe and populate with parent ID for each nested row
+    :type include_parent_id: bool
+
+    :return: Pandas DataFrame with object data
+    :rtype: pd.DataFrame
+    """
+
     columns_list: list[str] = [column["title"] for column in object_dict["columns"]]
 
     if include_parent_id:
@@ -222,14 +233,14 @@ def _to_dataframe(object_dict: dict,
     if include_row_id:
         columns_list.insert(0, "row_id")
 
-    rows_list = []
+    rows_list: list[list[Any]] = []
 
     # Handle empty sheet condition
     if not object_dict.get("rows", None):
         return pd.DataFrame(columns=columns_list)  # pyright: ignore
 
     for row in object_dict["rows"]:
-        cells_list = []
+        cells_list: list[Any] = []
         if include_row_id:
             cells_list.append(int(row["id"]))
         if include_parent_id:

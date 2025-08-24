@@ -1,4 +1,6 @@
 # Standard Imports
+import builtins
+import sys
 from unittest.mock import (
     patch,
     Mock
@@ -117,7 +119,7 @@ class TestGetReportAsDf:
 
     def test_get_report_as_df_token_without_report_id_but_token_is_report_obj(self):
         with pytest.raises(ValueError):
-            get_report_as_df(token=smartsheet.models.Report())
+            get_report_as_df(token=smartsheet.models.Report())  # type: ignore
 
     def test_get_report_as_df_token_without_report_id(self):
         with pytest.raises(ValueError):
@@ -126,7 +128,7 @@ class TestGetReportAsDf:
 
 class TestGetSheetAsDf:
     @patch('smartsheet_dataframe.smartsheet_dataframe._get_from_request')
-    def test_get_sheet_as_df_with_token_and_sheet_id(self, mock_get_from_request):
+    def test_sheet_id__with_token(self, mock_get_from_request):
         mock_response = {
             "columns": [{"title": "Column1"}, {"title": "Column2"}],
             "rows": [{"id": 1, "cells": [{"value": "Value1"}, {"value": "Value2"}]}]
@@ -140,9 +142,30 @@ class TestGetSheetAsDf:
         assert "Column2" in df.columns
         assert df.loc[0, "Column1"] in "Value1"
 
+    @patch('smartsheet_dataframe.smartsheet_dataframe._get_from_request')
+    def test_sheet_obj(self, mock_get_from_request):
+        mock_response = {
+            "columns": [{"title": "Column1"}, {"title": "Column2"}],
+            "rows": [{"id": 1, "cells": [{"value": "Value1"}, {"value": "Value2"}]}]
+        }
+        mock_get_from_request.return_value = mock_response
+
+        mock_sheet_obj = Mock()
+        mock_sheet_obj.to_dict.return_value = mock_response
+
+        df = get_sheet_as_df(sheet_obj=mock_sheet_obj)
+
+        assert isinstance(df, pd.DataFrame)
+        assert "Column1" in df.columns
+        assert "Column2" in df.columns
+        assert df.loc[0, "Column1"] in "Value1"
+
     @patch('warnings.warn')
     @patch('smartsheet_dataframe.smartsheet_dataframe._get_from_request')
-    def test_get_sheet_as_df_with_both_token_and_sheet_obj(self, mock_get_from_request, mock_warn):
+    def test_sheet_id_and_obj__with_token(self, mock_get_from_request, mock_warn):
+        """Ensure that a warning is raised if both sheet_id and sheet_obj are provided
+        and that the sheet_id is ignored."""
+
         mock_response = {
             "columns": [{"title": "Column1"}, {"title": "Column2"}],
             "rows": [{"id": 1, "cells": [{"value": "Value1"}, {"value": "Value2"}]}]
@@ -157,17 +180,41 @@ class TestGetSheetAsDf:
         mock_warn.assert_called_with("A 'sheet_id' has been provided along with a 'sheet_obj' \n" +
                                      "The 'sheet_id' parameter will be ignored")
 
-    def test_get_sheet_as_df_without_token_or_sheet_obj(self):
-        with pytest.raises(ValueError):
+        assert isinstance(df, pd.DataFrame)
+        assert "Column1" in df.columns
+        assert "Column2" in df.columns
+        assert df.loc[0, "Column1"] in "Value1"
+
+    @patch.dict(sys.modules, {'smartsheet': None})
+    def test_sheet_obj__with_token__missing_smartsheet_import(self):
+        with pytest.raises(ValueError) as e:
+            get_sheet_as_df(token="fake_token", sheet_obj=smartsheet.models.Sheet())
+
+        assert "A sheet_id must be included in the parameters if a token is provided" in str(e.value)
+
+    def test_sheet_obj_with_token(self):
+        with pytest.raises(ValueError) as e:
+            get_sheet_as_df(token="fake_token", sheet_obj=smartsheet.models.Sheet())
+
+        assert "A sheet_id must be included in the parameters if a token is provided" in str(e.value)
+
+    def test_without_token_or_sheet_obj(self):
+        with pytest.raises(ValueError) as e:
             get_sheet_as_df()
 
-    def test_get_sheet_as_df_token_without_sheet_id_but_token_is_sheet_obj(self):
-        with pytest.raises(ValueError):
-            get_sheet_as_df(token=smartsheet.models.Sheet())
+        assert "One of 'token' or 'sheet_obj' must be included in parameters" in str(e.value)
 
-    def test_get_sheet_as_df_token_without_sheet_id(self):
-        with pytest.raises(ValueError) as context:
+    def test_token__without_sheet_id_but_token_is_sheet_obj(self):
+        with pytest.raises(ValueError) as e:
+            get_sheet_as_df(token=smartsheet.models.Sheet())  # type: ignore
+
+        assert "Function must be called with the 'sheet_obj=' keyword argument" in str(e.value)
+
+    def test_token__without_sheet_id(self):
+        with pytest.raises(ValueError) as e:
             get_sheet_as_df(token="test")
+
+        assert "A sheet_id must be included in the parameters if a token is provided" in str(e.value)
 
 
 class TestGetAsDf:
@@ -252,10 +299,10 @@ class TestDoRequest:
 
         mock_get.return_value = mock_response_rate_limit
 
-        with pytest.raises(Exception) as excinfo:
+        with pytest.raises(Exception) as e:
             _do_request(url="https://fakeurl.com", options={}, retries=3)
 
-        assert 'Could not retrieve request after retrying' in str(excinfo.value)
+        assert 'Could not retrieve request after retrying' in str(e.value)
 
 
 class TestToDataFrame:
@@ -269,7 +316,7 @@ class TestToDataFrame:
         df = _to_dataframe(mock_object_dict)
 
         assert isinstance(df, pd.DataFrame)
-        assert df.empty
+        assert df.empty is True
         assert "Column1" in df.columns
         assert "Column2" in df.columns
 
