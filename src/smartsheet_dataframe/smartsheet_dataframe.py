@@ -8,7 +8,10 @@ reports and sheets as a Pandas DataFrame
 import logging
 import time
 import warnings
-from typing import Any
+from typing import (
+    Any,
+    Optional,
+)
 
 # 3rd-Party Imports
 import pandas as pd
@@ -20,11 +23,11 @@ from .exceptions import AuthenticationError
 logger = logging.getLogger(__name__)
 
 
-def get_report_as_df(token: str = None,
-                     report_id: int = None,
+def get_report_as_df(token: Optional[str] = None,
+                     report_id: Optional[int] = None,
                      include_row_id: bool = True,
                      include_parent_id: bool = True,
-                     report_obj: Any = None) -> pd.DataFrame:
+                     report_obj: Optional[Any] = None) -> pd.DataFrame:
     """Get a Smartsheet report as a Pandas DataFrame.
 
     :param token: Smartsheet Personal Access Token
@@ -49,12 +52,13 @@ def get_report_as_df(token: str = None,
     :return: Pandas DataFrame with report data
     :rtype: pd.DataFrame
     """
+
     if not (token or report_obj):
         raise ValueError("One of 'token' or 'report_obj' must be included in parameters")
 
     if token and not report_id:
         try:
-            import smartsheet.models
+            import smartsheet.models  # noqa: PLC0415
             if isinstance(token, smartsheet.models.sheet.Sheet):
                 raise ValueError("Function must be called with the 'report_obj=' keyword argument")
         except ModuleNotFoundError:
@@ -70,13 +74,15 @@ def get_report_as_df(token: str = None,
         return _to_dataframe(_get_from_request(token, report_id, type_="REPORT"), include_row_id, include_parent_id)
     elif report_obj:
         return _to_dataframe(report_obj.to_dict(), include_row_id, include_parent_id)
+    else:
+        raise ValueError("One of 'token' or 'report_obj' must be included in parameters")
 
 
-def get_sheet_as_df(token: str = None,
-                    sheet_id: int = None,
+def get_sheet_as_df(token: Optional[str] = None,
+                    sheet_id: Optional[int] = None,
                     include_row_id: bool = True,
                     include_parent_id: bool = True,
-                    sheet_obj: Any = None) -> pd.DataFrame:
+                    sheet_obj: Optional[Any] = None) -> pd.DataFrame:
     """Get a Smartsheet sheet as a Pandas DataFrame.
 
     :param token: Smartsheet personal authentication token
@@ -107,7 +113,7 @@ def get_sheet_as_df(token: str = None,
 
     if token and not sheet_id:
         try:
-            import smartsheet.models
+            import smartsheet.models  # noqa: PLC0415
             if isinstance(token, smartsheet.models.sheet.Sheet):
                 raise ValueError("Function must be called with the 'sheet_obj=' keyword argument")
         except ModuleNotFoundError:
@@ -123,12 +129,14 @@ def get_sheet_as_df(token: str = None,
         return _to_dataframe(_get_from_request(token, sheet_id, type_="SHEET"), include_row_id, include_parent_id)
     elif sheet_obj:
         return _to_dataframe(sheet_obj.to_dict(), include_row_id, include_parent_id)
+    else:
+        raise ValueError("One of 'token' or 'sheet_obj' must be included in parameters")
 
 
 def get_as_df(type_: str,
-              token: str = None,
-              id_: int = None,
-              obj: Any = None,
+              token: Optional[str] = None,
+              id_: Optional[int] = None,
+              obj: Optional[Any] = None,
               include_row_id: bool = True,
               include_parent_id: bool = True) -> pd.DataFrame:
     """Get a Smartsheet report or sheet as a Pandas DataFrame.
@@ -158,12 +166,13 @@ def get_as_df(type_: str,
     :return: Pandas DataFrame with object data
     :rtype: pd.DataFrame
     """
+
     if not (token or obj):
         raise ValueError("One of 'token' or 'obj' must be included in parameters")
 
     if token and not id_:
         try:
-            import smartsheet.models
+            import smartsheet.models  # noqa: PLC0415
             if isinstance(token, smartsheet.models.sheet.Sheet):
                 raise ValueError("Function must be called with the 'sheet_obj=' keyword argument")
         except ModuleNotFoundError:
@@ -179,6 +188,8 @@ def get_as_df(type_: str,
         return _to_dataframe(_get_from_request(token, id_, type_), include_row_id, include_parent_id)
     elif obj:
         return _to_dataframe(obj.to_dict(), include_row_id, include_parent_id)
+    else:
+        raise ValueError("One of 'token' or 'obj' must be included in parameters")
 
 
 def _get_from_request(token: str, id_: int, type_: str) -> dict:
@@ -201,8 +212,10 @@ def _get_from_request(token: str, id_: int, type_: str) -> dict:
     return response.json()
 
 
-def _to_dataframe(object_dict: dict, include_row_id: bool = True, include_parent_id: bool = True) -> pd.DataFrame:
-    columns_list = [column["title"] for column in object_dict["columns"]]
+def _to_dataframe(object_dict: dict,
+                  include_row_id: bool = True,
+                  include_parent_id: bool = True) -> pd.DataFrame:
+    columns_list: list[str] = [column["title"] for column in object_dict["columns"]]
 
     if include_parent_id:
         columns_list.insert(0, "parent_id")
@@ -213,7 +226,7 @@ def _to_dataframe(object_dict: dict, include_row_id: bool = True, include_parent
 
     # Handle empty sheet condition
     if not object_dict.get("rows", None):
-        return pd.DataFrame(columns=columns_list)
+        return pd.DataFrame(columns=columns_list)  # pyright: ignore
 
     for row in object_dict["rows"]:
         cells_list = []
@@ -232,7 +245,7 @@ def _to_dataframe(object_dict: dict, include_row_id: bool = True, include_parent
         else:
             rows_list.append(cells_list)
 
-    return pd.DataFrame(rows_list, columns=columns_list)
+    return pd.DataFrame(rows_list, columns=columns_list)  # pyright: ignore
 
 
 def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
