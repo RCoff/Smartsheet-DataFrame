@@ -41,7 +41,7 @@ def get_report_as_df(token: Optional[str] = None,
     :type include_row_id: bool
 
     :param include_parent_id: If True, will append a 'parent_id' column to the
-            dataframe and populat with parent ID for each nested row
+            dataframe and populate with parent ID for each nested row
     :type include_parent_id: bool
 
     :param report_obj: Smartsheet Python SDK Report object
