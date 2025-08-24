@@ -10,3 +10,4 @@ dev.py
 *.pypirc
 .env
 .coverage
+*.xml
