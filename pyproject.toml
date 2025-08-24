@@ -95,6 +95,7 @@ omit = [
 [dependency-groups]
 dev = [
     "isort>=5.10.1",
+    "pyright>=0.0.13.post0",
     "pytest>=7.0.1",
     "pytest-cov>=4.0.0",
     "ruff>=0.0.17",
