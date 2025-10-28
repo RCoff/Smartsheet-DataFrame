@@ -1,0 +1,323 @@
+{
+  "accessLevel": "OWNER",
+  "columns": [
+    {
+      "id": 4740086377015172,
+      "index": 0,
+      "primary": true,
+      "title": "Primary Column",
+      "type": "TEXT_NUMBER",
+      "validation": false,
+      "version": 0,
+      "width": 180
+    },
+    {
+      "id": 2488286563329924,
+      "index": 1,
+      "title": "Contact",
+      "type": "CONTACT_LIST",
+      "validation": false,
+      "version": 0,
+      "width": 150
+    },
+    {
+      "id": 6991886190700420,
+      "index": 2,
+      "title": "Column3",
+      "type": "TEXT_NUMBER",
+      "validation": false,
+      "version": 0,
+      "width": 150
+    },
+    {
+      "id": 1362386656487300,
+      "index": 3,
+      "title": "Column4",
+      "type": "TEXT_NUMBER",
+      "validation": false,
+      "version": 0,
+      "width": 150
+    },
+    {
+      "id": 5865986283857796,
+      "index": 4,
+      "title": "Column5",
+      "type": "TEXT_NUMBER",
+      "validation": false,
+      "version": 0,
+      "width": 150
+    },
+    {
+      "id": 3614186470172548,
+      "index": 5,
+      "title": "Column6",
+      "type": "TEXT_NUMBER",
+      "validation": false,
+      "version": 0,
+      "width": 150
+    }
+  ],
+  "dependenciesEnabled": false,
+  "effectiveAttachmentOptions": [
+    "EGNYTE",
+    "LINK",
+    "GOOGLE_DRIVE",
+    "DROPBOX",
+    "ONEDRIVE",
+    "FILE",
+    "BOX_COM",
+    "EVERNOTE"
+  ],
+  "ganttEnabled": false,
+  "hasSummaryFields": false,
+  "name": "Test Sheet",
+  "resourceManagementEnabled": false,
+  "rows": [
+    {
+      "cells": [
+        {
+          "columnId": 4740086377015172,
+          "displayValue": "This is a row in the sheet",
+          "objectValue": "This is a row in the sheet",
+          "value": "This is a row in the sheet"
+        },
+        {
+          "columnId": 2488286563329924,
+          "displayValue": "Test User",
+          "objectValue": {
+            "email": "testuser@example.com",
+            "name": "Test User",
+            "objectType": "CONTACT"
+          },
+          "value": "testuser@example.com"
+        },
+        {
+          "columnId": 6991886190700420
+        },
+        {
+          "columnId": 1362386656487300
+        },
+        {
+          "columnId": 5865986283857796
+        },
+        {
+          "columnId": 3614186470172548
+        }
+      ],
+      "expanded": true,
+      "rowNumber": 1
+    },
+    {
+      "cells": [
+        {
+          "columnId": 4740086377015172,
+          "displayValue": "This is a second row",
+          "objectValue": "This is a second row",
+          "value": "This is a second row"
+        },
+        {
+          "columnId": 2488286563329924
+        },
+        {
+          "columnId": 6991886190700420
+        },
+        {
+          "columnId": 1362386656487300
+        },
+        {
+          "columnId": 5865986283857796
+        },
+        {
+          "columnId": 3614186470172548,
+          "displayValue": "Some value here",
+          "objectValue": "Some value here",
+          "value": "Some value here"
+        }
+      ],
+      "expanded": true,
+      "rowNumber": 2
+    },
+    {
+      "cells": [
+        {
+          "columnId": 4740086377015172
+        },
+        {
+          "columnId": 2488286563329924
+        },
+        {
+          "columnId": 6991886190700420
+        },
+        {
+          "columnId": 1362386656487300
+        },
+        {
+          "columnId": 5865986283857796
+        },
+        {
+          "columnId": 3614186470172548
+        }
+      ],
+      "expanded": true,
+      "rowNumber": 3
+    },
+    {
+      "cells": [
+        {
+          "columnId": 4740086377015172
+        },
+        {
+          "columnId": 2488286563329924
+        },
+        {
+          "columnId": 6991886190700420,
+          "displayValue": "0",
+          "formula": "=COUNT(ANCESTORS())",
+          "objectValue": 0.0,
+          "value": 0.0
+        },
+        {
+          "columnId": 1362386656487300
+        },
+        {
+          "columnId": 5865986283857796
+        },
+        {
+          "columnId": 3614186470172548
+        }
+      ],
+      "expanded": true,
+      "rowNumber": 4
+    },
+    {
+      "cells": [
+        {
+          "columnId": 4740086377015172
+        },
+        {
+          "columnId": 2488286563329924
+        },
+        {
+          "columnId": 6991886190700420
+        },
+        {
+          "columnId": 1362386656487300
+        },
+        {
+          "columnId": 5865986283857796
+        },
+        {
+          "columnId": 3614186470172548
+        }
+      ],
+      "expanded": true,
+      "rowNumber": 5
+    },
+    {
+      "cells": [
+        {
+          "columnId": 4740086377015172,
+          "displayValue": "Parent 1",
+          "objectValue": "Parent 1",
+          "value": "Parent 1"
+        },
+        {
+          "columnId": 2488286563329924
+        },
+        {
+          "columnId": 6991886190700420,
+          "displayValue": "1",
+          "formula": "=COUNT(CHILDREN([Primary Column]@row))",
+          "objectValue": 1.0,
+          "value": 1.0
+        },
+        {
+          "columnId": 1362386656487300
+        },
+        {
+          "columnId": 5865986283857796
+        },
+        {
+          "columnId": 3614186470172548
+        }
+      ],
+      "expanded": true,
+      "rowNumber": 6
+    },
+    {
+      "cells": [
+        {
+          "columnId": 4740086377015172,
+          "displayValue": "child",
+          "objectValue": "child",
+          "value": "child"
+        },
+        {
+          "columnId": 2488286563329924
+        },
+        {
+          "columnId": 6991886190700420,
+          "displayValue": "1",
+          "formula": "=COUNT(ANCESTORS([Primary Column]@row))",
+          "objectValue": 1.0,
+          "value": 1.0
+        },
+        {
+          "columnId": 1362386656487300
+        },
+        {
+          "columnId": 5865986283857796
+        },
+        {
+          "columnId": 3614186470172548
+        }
+      ],
+      "expanded": true,
+      "rowNumber": 7
+    },
+    {
+      "cells": [
+        {
+          "columnId": 4740086377015172,
+          "displayValue": "childer",
+          "objectValue": "childer",
+          "value": "childer"
+        },
+        {
+          "columnId": 2488286563329924
+        },
+        {
+          "columnId": 6991886190700420,
+          "displayValue": "2",
+          "formula": "=COUNT(ANCESTORS([Primary Column]@row))",
+          "objectValue": 2.0,
+          "value": 2.0
+        },
+        {
+          "columnId": 1362386656487300
+        },
+        {
+          "columnId": 5865986283857796
+        },
+        {
+          "columnId": 3614186470172548
+        }
+      ],
+      "expanded": true,
+      "rowNumber": 8
+    }
+  ],
+  "totalRowCount": 8,
+  "userPermissions": {
+    "summaryPermissions": "ADMIN"
+  },
+  "userSettings": {
+    "criticalPathEnabled": false,
+    "displaySummaryTasks": true
+  },
+  "version": 6,
+  "workspace": {
+    "id": 100000000000000,
+    "name": "Test Workspace"
+  }
+}

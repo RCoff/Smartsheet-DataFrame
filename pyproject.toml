@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "smartsheet-dataframe"
-version = "0.3.4"
+version = "0.3.5"
 authors = [
     { name = "Ridge Coffman", email = "coffman.ridge@gmail.com" },
 ]
@@ -28,6 +28,61 @@ dependencies = [
 Homepage = "https://github.com/RCoff/Smartsheet-DataFrame"
 Issues = "https://github.com/RCoff/Smartsheet-DataFrame/issues"
 
+[tool.isort]
+force_grid_wrap = 3
+include_trailing_comma = true
+multi_line_output = 3
+use_parentheses = true
+
+[tool.pyright]
+include = ["src"]
+
+[tool.ruff]
+exclude = ["tests"]
+
+[tool.ruff.lint]
+extend-select = [
+    "A",
+    "ANN",
+    "ASYNC",
+    "B",
+    "BLE",
+    "C4",
+    "COM",
+    "D",
+    "DTZ",
+    "ERA",
+    "G",
+    "ICN",
+    "INP",
+    "LOG",
+    "N",
+    "PD",
+    "PIE",
+    "PLC",
+    "PLE",
+    "PLR",
+    "PTH",
+    "PYI",
+    "Q",
+    "S",
+    "T20",
+    "TC",
+    "UP",
+    "W",
+]
+extend-ignore = [
+    "ANN401",
+    "B028",
+    "D202",
+    "D203",
+    "D213",
+    "G0",
+    "PLR0913",
+    "PLR2004",
+    "S113",
+]
+
 [tool.setuptools]
 package-dir = { "" = "src" }
 
@@ -38,4 +93,14 @@ where = ["src"]
 omit = [
     "config.py",
     "dev.py",
+]
+
+[dependency-groups]
+dev = [
+    "isort>=5.10.1",
+    "pyright>=0.0.13.post0",
+    "pytest>=7.0.1",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.0.17",
+    "smartsheet-python-sdk==3.0.5",
 ]
