@@ -32,3 +32,8 @@ def report_id() -> int:
 @pytest.fixture
 def sheet(sheet_id: int, smartsheet_client: smartsheet.Smartsheet):
     return smartsheet_client.Sheets.get_sheet(sheet_id, include=["objectValue"], level=1)
+
+
+@pytest.fixture
+def report(report_id: int, smartsheet_client: smartsheet.Smartsheet):
+    return smartsheet_client.Reports.get_report(report_id, include=["objectValue"], level=1)
