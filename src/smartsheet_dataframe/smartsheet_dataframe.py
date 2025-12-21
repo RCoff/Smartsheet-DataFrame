@@ -206,7 +206,7 @@ def _get_from_request(token: str, id_: int, type_: str) -> dict:
     :rtype: dict
     """
 
-    if str(type_).upper() not in (SHEET, REPORT,):
+    if str(type_).upper() not in (SHEET, REPORT):
         raise ValueError(f"'type_' parameter must be one of SHEET or REPORT. The current value is '{type_.upper()}'")
 
     if type_.upper() == "SHEET":
@@ -305,7 +305,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
             response_json = response.json()
 
             if response.status_code != 200:
-                if response_json["errorCode"] in (1002, 1003, 1004,):
+                if response_json["errorCode"] in (1002, 1003, 1004):
                     raise AuthenticationError("Could not connect using the supplied auth token \n" +
                                               response.text)
                 elif response_json["errorCode"] == 4004:
