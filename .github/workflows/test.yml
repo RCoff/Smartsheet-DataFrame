@@ -1,6 +1,18 @@
 name: Run Tests
 
-on: [ push, pull_request ]
+on:
+  push:
+    paths:
+      - '.github/workflows/test.yml'
+      - 'src/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+  pull_request:
+    paths:
+      - '.github/workflows/test.yml'
+      - 'src/**'
+      - 'tests/**'
+      - 'pyproject.toml'
 
 env:
   smartsheet_access_token: ${{ vars.smartsheet_access_token }}
