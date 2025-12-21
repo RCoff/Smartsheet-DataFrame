@@ -19,6 +19,10 @@ import requests
 
 # Local Imports
 from .exceptions import AuthenticationError
+from .utils.constants import (
+    REPORT,
+    SHEET,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -187,6 +191,24 @@ def get_as_df(type_: str,
 
 
 def _get_from_request(token: str, id_: int, type_: str) -> dict:
+    """Get a Smartsheet object from the API via HTTP request.
+
+    :param token: Smartsheet personal authentication token
+    :type token: str
+
+    :param id_: Smartsheet object (report or sheet) ID
+    :type id_: int
+
+    :param type_: type of object to get. Must be one of 'REPORT' or 'SHEET'
+    :type type_: str
+
+    :return: Smartsheet sheet or report object dictionary
+    :rtype: dict
+    """
+
+    if str(type_).upper() not in (SHEET, REPORT,):
+        raise ValueError(f"'type_' parameter must be one of SHEET or REPORT. The current value is '{type_.upper()}'")
+
     if type_.upper() == "SHEET":
         url = f"https://api.smartsheet.com/2.0/sheets/{id_}?include=objectValue&level=1"
         logger.debug("Getting sheet request", extra={"id": id_,
@@ -198,8 +220,8 @@ def _get_from_request(token: str, id_: int, type_: str) -> dict:
                                                       "url": url,
                                                       "object_Type": "report"})
     else:
-        # TODO: Use guard clause
-        raise ValueError(f"'type_' parameter must be one of SHEET or REPORT. The current value is {type_.upper()}")
+        # Leaving for type checking purposes
+        raise ValueError(f"'type_' parameter must be one of SHEET or REPORT. The current value is '{type_.upper()}'")
 
     credentials: dict = {"Authorization": f"Bearer {token}"}
     response = _do_request(url, options=credentials)
