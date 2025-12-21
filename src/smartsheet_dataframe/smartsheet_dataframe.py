@@ -304,8 +304,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
             response_json = response.json()
 
             if response.status_code != 200:
-                if response_json["errorCode"] == 1002 or response_json["errorCode"] == 1003 or \
-                        response_json["errorCode"] == 1004:
+                if response_json["errorCode"] in (1002, 1003, 1004,):
                     raise AuthenticationError("Could not connect using the supplied auth token \n" +
                                               response.text)
                 elif response_json["errorCode"] == 4004:
@@ -318,6 +317,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
                     return  # TODO: Fix reportReturnType
         except AuthenticationError:
             logger.exception("Smartsheet returned an error status code")
+            # TODO: For 1.0 release, ensure that this is re-raised
             break
         except Exception:
             logger.exception(f"Not able to retrieve get response. Retrying... {i}")
@@ -325,6 +325,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
             continue
         break
     else:
+        # TODO: For 1.0 release, re-raise exception
         raise Exception(f"Could not retrieve request after retrying {i} times")
 
     return response  # TODO: Fix reportPossiblyUnboundVariable

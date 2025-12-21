@@ -20,6 +20,9 @@ from smartsheet_dataframe import (
     get_sheet_as_df,
     get_as_df,
 )
+from smartsheet_dataframe.exceptions import (
+    AuthenticationError,
+)
 from smartsheet_dataframe.smartsheet_dataframe import (
     _do_request,
     _get_from_request,
@@ -306,9 +309,28 @@ class TestDoRequest:
 
         assert 'Could not retrieve request after retrying' in str(e.value)
 
+    @patch('smartsheet_dataframe.smartsheet_dataframe.requests.get')
+    @pytest.mark.parametrize("error_code", [1002, 1003, 1004])
+    def test_do_request_auth_failure(self, mock_get, error_code, caplog):
+        mock_response = Mock()
+        mock_response.status_code = 401
+        mock_response.json.return_value = {"errorCode": error_code}
+        mock_response.text = "Test authentication failure message"
+        mock_get.return_value = mock_response
+
+        # Uncomment for 1.0 release
+        # with pytest.raises(AuthenticationError, match="auth") as e:
+        #     _do_request(url="https://fakeurl.com", options={})
+        # assert "Could not connect using the supplied auth token" in str(e.value)
+
+        _do_request(url="https://fakeurl.com", options={})
+
+        assert mock_get.call_count == 1
+        assert caplog.records[-1].levelname == "ERROR"
+        assert "Smartsheet returned an error status code" in caplog.text
+
 
 class TestToDataFrame:
-
     def test_to_dataframe_empty_sheet(self):
         mock_object_dict = {
             "columns": [{"title": "Column1"}, {"title": "Column2"}],
