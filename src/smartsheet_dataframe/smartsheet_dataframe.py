@@ -19,6 +19,10 @@ import requests
 
 # Local Imports
 from .exceptions import AuthenticationError
+from .utils.constants import (
+    REPORT,
+    SHEET,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -187,6 +191,24 @@ def get_as_df(type_: str,
 
 
 def _get_from_request(token: str, id_: int, type_: str) -> dict:
+    """Get a Smartsheet object from the API via HTTP request.
+
+    :param token: Smartsheet personal authentication token
+    :type token: str
+
+    :param id_: Smartsheet object (report or sheet) ID
+    :type id_: int
+
+    :param type_: type of object to get. Must be one of 'REPORT' or 'SHEET'
+    :type type_: str
+
+    :return: Smartsheet sheet or report object dictionary
+    :rtype: dict
+    """
+
+    if str(type_).upper() not in (SHEET, REPORT):
+        raise ValueError(f"'type_' parameter must be one of SHEET or REPORT. The current value is '{type_.upper()}'")
+
     if type_.upper() == "SHEET":
         url = f"https://api.smartsheet.com/2.0/sheets/{id_}?include=objectValue&level=1"
         logger.debug("Getting sheet request", extra={"id": id_,
@@ -198,8 +220,8 @@ def _get_from_request(token: str, id_: int, type_: str) -> dict:
                                                       "url": url,
                                                       "object_Type": "report"})
     else:
-        # TODO: Use guard clause
-        raise ValueError(f"'type_' parameter must be one of SHEET or REPORT. The current value is {type_.upper()}")
+        # Leaving for type checking purposes
+        raise ValueError(f"'type_' parameter must be one of SHEET or REPORT. The current value is '{type_.upper()}'")
 
     credentials: dict = {"Authorization": f"Bearer {token}"}
     response = _do_request(url, options=credentials)
@@ -275,6 +297,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
     :return: Requests response object
     :rtype: requests.Response
     """
+
     i = 0
     for i in range(retries):
         try:
@@ -282,8 +305,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
             response_json = response.json()
 
             if response.status_code != 200:
-                if response_json["errorCode"] == 1002 or response_json["errorCode"] == 1003 or \
-                        response_json["errorCode"] == 1004:
+                if response_json["errorCode"] in (1002, 1003, 1004):
                     raise AuthenticationError("Could not connect using the supplied auth token \n" +
                                               response.text)
                 elif response_json["errorCode"] == 4004:
@@ -296,6 +318,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
                     return  # TODO: Fix reportReturnType
         except AuthenticationError:
             logger.exception("Smartsheet returned an error status code")
+            # TODO: For 1.0 release, ensure that this is re-raised
             break
         except Exception:
             logger.exception(f"Not able to retrieve get response. Retrying... {i}")
@@ -303,13 +326,24 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
             continue
         break
     else:
+        # TODO: For 1.0 release, re-raise exception
         raise Exception(f"Could not retrieve request after retrying {i} times")
 
     return response  # TODO: Fix reportPossiblyUnboundVariable
 
 
 def _handle_object_value(object_value: dict) -> str:
+    """Handle Smartsheet objectValue cell types.
+
+    :param object_value: Smartsheet objectValue dictionary
+    :type object_value: dict
+
+    :return: String representation of objectValue
+    :rtype: str
+    """
+
     email_list_string: str = ""
+
     if object_value["objectType"].upper() == "MULTI_CONTACT":
         email_list_string = ", ".join(obj["email"] for obj in object_value["values"])
 
