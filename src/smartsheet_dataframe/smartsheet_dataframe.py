@@ -65,7 +65,7 @@ def get_report_as_df(token: Optional[str] = None,
 
     if report_obj and report_id:
         warnings.warn("A 'report_id' has been provided along with a 'report_obj' \n" +
-                      "The 'sheet_id' parameter will be ignored")
+                      "The 'report_id' parameter will be ignored")
 
     if token and report_id:
         return _to_dataframe(_get_from_request(token, report_id, type_="REPORT"), include_row_id, include_parent_id)
