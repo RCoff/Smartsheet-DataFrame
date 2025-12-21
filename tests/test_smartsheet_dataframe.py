@@ -33,7 +33,7 @@ from smartsheet_dataframe.utils.constants import (
 load_dotenv()
 
 
-@pytest.mark.skipIf(str(os.environ.get("SKIP_LIVE_TESTS", "1") == "1"),
+@pytest.mark.skipIf(str(os.environ.get("SKIP_LIVE_TESTS", "1")) == "1",
                     reason="Not testing live API calls at this time")
 class TestSheet:
     def test_df_has_all_rows__api(self, smartsheet_access_token: str, sheet_id: int):
@@ -60,7 +60,7 @@ class TestSheet:
         assert df1.to_dict() == df2.to_dict()
 
 
-@pytest.mark.skipIf(str(os.environ.get("SKIP_LIVE_TESTS", "1") == "1"),
+@pytest.mark.skipIf(str(os.environ.get("SKIP_LIVE_TESTS", "1")) == "1",
                     reason="Not testing live API calls at this time")
 class TestReport:
     def test_report_object_and_request_are_equal(self, smartsheet_access_token: str, report_id: int, report):
@@ -338,7 +338,7 @@ class TestToDataFrame:
 
 
 class TestGetFromRequest:
-    @pytest.mark.skipIf(str(os.environ.get("SKIP_LIVE_TESTS", "1") == "1"),
+    @pytest.mark.skipIf(str(os.environ.get("SKIP_LIVE_TESTS", "1")) == "1",
                         reason="Not testing live API calls at this time")
     def test_report_live(self, smartsheet_access_token: str, report_id: int):
         """ Ensure that a report can be retrieved. """
