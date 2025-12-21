@@ -198,6 +198,7 @@ def _get_from_request(token: str, id_: int, type_: str) -> dict:
                                                       "url": url,
                                                       "object_Type": "report"})
     else:
+        # TODO: Use guard clause
         raise ValueError(f"'type_' parameter must be one of SHEET or REPORT. The current value is {type_.upper()}")
 
     credentials: dict = {"Authorization": f"Bearer {token}"}
