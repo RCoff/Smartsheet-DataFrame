@@ -65,7 +65,7 @@ def get_report_as_df(token: Optional[str] = None,
 
     if report_obj and report_id:
         warnings.warn("A 'report_id' has been provided along with a 'report_obj' \n" +
-                      "The 'sheet_id' parameter will be ignored")
+                      "The 'report_id' parameter will be ignored")
 
     if token and report_id:
         return _to_dataframe(_get_from_request(token, report_id, type_="REPORT"), include_row_id, include_parent_id)
@@ -198,6 +198,7 @@ def _get_from_request(token: str, id_: int, type_: str) -> dict:
                                                       "url": url,
                                                       "object_Type": "report"})
     else:
+        # TODO: Use guard clause
         raise ValueError(f"'type_' parameter must be one of SHEET or REPORT. The current value is {type_.upper()}")
 
     credentials: dict = {"Authorization": f"Bearer {token}"}
@@ -292,7 +293,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
                 else:
                     warnings.warn("An unhandled status_code was returned by the Smartsheet API: \n" +
                                   response.text)
-                    return
+                    return  # TODO: Fix reportReturnType
         except AuthenticationError:
             logger.exception("Smartsheet returned an error status code")
             break
@@ -304,7 +305,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
     else:
         raise Exception(f"Could not retrieve request after retrying {i} times")
 
-    return response
+    return response  # TODO: Fix reportPossiblyUnboundVariable
 
 
 def _handle_object_value(object_value: dict) -> str:

@@ -2,6 +2,13 @@ name: Run Tests
 
 on: [ push, pull_request ]
 
+env:
+  smartsheet_access_token: ${{ vars.smartsheet_access_token }}
+  testing_report_id: ${{ vars.testing_report_id }}
+  testing_sheet_id: ${{ vars.testing_sheet_id }}
+  SKIP_LIVE_TESTS: "1"
+
+
 jobs:
   test:
     runs-on: ubuntu-latest

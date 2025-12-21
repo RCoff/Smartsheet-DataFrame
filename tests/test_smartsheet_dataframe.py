@@ -1,6 +1,8 @@
 # Standard Imports
 import builtins
+import os
 import sys
+from json import load
 from unittest.mock import (
     patch,
     Mock
@@ -10,6 +12,7 @@ from unittest.mock import (
 import pandas as pd
 import pytest
 import smartsheet
+from dotenv import load_dotenv
 
 # Local Imports
 from smartsheet_dataframe import (
@@ -19,63 +22,62 @@ from smartsheet_dataframe import (
 )
 from smartsheet_dataframe.smartsheet_dataframe import (
     _do_request,
-    _to_dataframe
+    _get_from_request,
+    _to_dataframe,
+)
+from smartsheet_dataframe.utils.constants import (
+    REPORT,
+    SHEET,
 )
 
+load_dotenv()
 
-@pytest.mark.skip("Not testing API calls at this time")
+
+@pytest.mark.skipif(str(os.environ.get("SKIP_LIVE_TESTS", "1")) == "1",
+                    reason="Not testing live API calls at this time")
 class TestSheet:
-    def setUp(self):
-        import config
-        self.token = config.smartsheet_access_token
-        self.sheet_id = config.sheet_id
-        self.report_id = config.report_id
-        self.sheet_client = smartsheet.Smartsheet(self.token)
-        self.sheet_obj = self.sheet_client.Sheets.get_sheet(self.sheet_id, include=['objectValue'], level=1)
+    def test_df_has_all_rows__api(self, smartsheet_access_token: str, sheet_id: int):
+        df = get_sheet_as_df(token=smartsheet_access_token, sheet_id=sheet_id)
 
-    def test_object_and_request_are_equal(self):
-        df1 = get_sheet_as_df(token=self.token, sheet_id=self.sheet_id)
-        df2 = get_sheet_as_df(sheet_obj=self.sheet_obj)
+        assert len(df.index) > 100
+
+    def test_object_and_request_are_equal(self, smartsheet_access_token: str, sheet_id: int, sheet):
+        df1 = get_sheet_as_df(token=smartsheet_access_token, sheet_id=sheet_id)
+        df2 = get_sheet_as_df(sheet_obj=sheet)
 
         assert df1.to_dict() == df2.to_dict()
 
-    def test_generic_vs_specific_requests(self):
-        df1 = get_sheet_as_df(token=self.token, sheet_id=self.sheet_id)
-        df2 = get_as_df(type_='sheet', token=self.token, id_=self.sheet_id)
+    def test_generic_vs_specific_requests(self, smartsheet_access_token: str, sheet_id: int):
+        df1 = get_sheet_as_df(token=smartsheet_access_token, sheet_id=sheet_id)
+        df2 = get_as_df(type_='sheet', token=smartsheet_access_token, id_=sheet_id)
 
         assert df1.to_dict() == df2.to_dict()
 
-    def test_generic_vs_specific_object(self):
-        df1 = get_sheet_as_df(sheet_obj=self.sheet_obj)
-        df2 = get_as_df(type_='sheet', obj=self.sheet_obj)
+    def test_generic_vs_specific_object(self, sheet):
+        df1 = get_sheet_as_df(sheet_obj=sheet)
+        df2 = get_as_df(type_='sheet', obj=sheet)
 
         assert df1.to_dict() == df2.to_dict()
 
 
-@pytest.mark.skip("Not testing API calls at this time")
+@pytest.mark.skipif(str(os.environ.get("SKIP_LIVE_TESTS", "1")) == "1",
+                    reason="Not testing live API calls at this time")
 class TestReport:
-    def setUp(self):
-        import config
-        self.token = config.smartsheet_access_token
-        self.report_id = config.report_id
-        self.sheet_client = smartsheet.Smartsheet(self.token)
-        self.report_obj = self.sheet_client.Reports.get_report(self.report_id)
-
-    def test_report_object_and_request_are_equal(self):
-        df1 = get_report_as_df(token=self.token, report_id=self.report_id)
-        df2 = get_report_as_df(report_obj=self.report_obj)
+    def test_report_object_and_request_are_equal(self, smartsheet_access_token: str, report_id: int, report):
+        df1 = get_report_as_df(token=smartsheet_access_token, report_id=report_id)
+        df2 = get_report_as_df(report_obj=report)
 
         assert df1.to_dict() == df2.to_dict()
 
-    def test_generic_vs_specific_requests(self):
-        df1 = get_report_as_df(token=self.token, report_id=self.report_id)
-        df2 = get_as_df(type_='report', token=self.token, id_=self.report_id)
+    def test_generic_vs_specific_requests(self, smartsheet_access_token: str, report_id: int):
+        df1 = get_report_as_df(token=smartsheet_access_token, report_id=report_id)
+        df2 = get_as_df(type_='report', token=smartsheet_access_token, id_=report_id)
 
         assert df1.to_dict() == df2.to_dict()
 
-    def test_generic_vs_specific_object(self):
-        df1 = get_report_as_df(report_obj=self.report_obj)
-        df2 = get_as_df(type_='report', obj=self.report_obj)
+    def test_generic_vs_specific_object(self, report):
+        df1 = get_report_as_df(report_obj=report)
+        df2 = get_as_df(type_='report', obj=report)
 
         assert df1.to_dict() == df2.to_dict()
 
@@ -111,7 +113,7 @@ class TestGetReportAsDf:
         df = get_report_as_df(token="fake_token", report_id=12345, report_obj=mock_report_obj)
 
         mock_warn.assert_called_with("A 'report_id' has been provided along with a 'report_obj' \n" +
-                                     "The 'sheet_id' parameter will be ignored")
+                                     "The 'report_id' parameter will be ignored")
 
     def test_get_report_as_df_without_token_or_report_obj(self):
         with pytest.raises(ValueError):
@@ -333,3 +335,42 @@ class TestToDataFrame:
         assert "Column2" in df.columns
         assert df.loc[0, "Column1"] == "Value1"
         assert df.loc[0, "Column2"] == "Value2"
+
+
+class TestGetFromRequest:
+    @pytest.mark.skipif(str(os.environ.get("SKIP_LIVE_TESTS", "1")) == "1",
+                        reason="Not testing live API calls at this time")
+    def test_report_live(self, smartsheet_access_token: str, report_id: int):
+        """ Ensure that a report can be retrieved. """
+
+        response_json = _get_from_request(token=smartsheet_access_token,
+                                          id_=report_id,
+                                          type_="REPORT")
+
+        assert response_json is not None
+        assert isinstance(response_json, dict)
+
+    def test_unknown_type_raises(self):
+        """ Ensure that an unknown "type_" argument raises an exception. """
+
+        with pytest.raises(ValueError) as e:
+            _get_from_request(token="fake_token", id_=1234, type_="UNKNOWN")
+
+        assert "parameter must be one of SHEET or REPORT" in str(e.value)
+
+    @pytest.mark.parametrize("object_type", ["SHEET", "REPORT", REPORT, SHEET])
+    @patch('smartsheet_dataframe.smartsheet_dataframe._do_request')
+    def test_known_types_do_not_raise(self, mock_do_request, object_type):
+        MockResponse = Mock(
+            status_code=200,
+            json=lambda: {"data": "some_data"}
+        )
+
+        mock_do_request.return_value = MockResponse
+
+        response_json = _get_from_request(token="fake_token", id_=1234, type_=object_type)
+
+        assert response_json is not None
+        assert isinstance(response_json, dict)
+        assert response_json["data"] == "some_data"
+        assert mock_do_request.call_count == 1
