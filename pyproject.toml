@@ -14,14 +14,20 @@ requires-python = ">=3.6.5"
 license = { text = "MIT" }
 classifiers = [
     "Natural Language :: English",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Office/Business :: Financial :: Spreadsheet",
 ]
 dependencies = [
-    "pandas>=1.1.0",
-    "requests>=2.20.0"
+    "pandas>=0.24.0",
+    "requests>=2.0.0"
 ]
 
 [project.urls]

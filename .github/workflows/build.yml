@@ -70,3 +70,8 @@ jobs:
           find dist_all -type f -maxdepth 3 -exec cp {} dist/ \;
           ls -al dist
           python -m twine upload dist/* --skip-existing
+
+      - name: Create GitHub Release and attach built distributions
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*

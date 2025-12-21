@@ -16,8 +16,9 @@ TODO:
 
 ## Requirements
 
-* Python 3+ (Tested using 3.6.5+)
+* Python 3+ (Tested using 3.8+)
 * Pandas >= 0.24.0
+* Requests >= 2.0.0
 
 ## From PyPI
 
