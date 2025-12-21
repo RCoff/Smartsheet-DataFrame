@@ -292,7 +292,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
                 else:
                     warnings.warn("An unhandled status_code was returned by the Smartsheet API: \n" +
                                   response.text)
-                    return
+                    return  # TODO: Fix reportReturnType
         except AuthenticationError:
             logger.exception("Smartsheet returned an error status code")
             break
@@ -304,7 +304,7 @@ def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
     else:
         raise Exception(f"Could not retrieve request after retrying {i} times")
 
-    return response
+    return response  # TODO: Fix reportPossiblyUnboundVariable
 
 
 def _handle_object_value(object_value: dict) -> str:
