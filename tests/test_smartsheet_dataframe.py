@@ -414,7 +414,7 @@ class TestHandleObjectValue:
         )
     ])
     def test_success(self, object_type, values, expected):
-        """Ensure that obJectValue cell types are handled correctly."""
+        """Ensure that objectValue cell types are handled correctly."""
 
         object_value = {
             "objectType": object_type,
