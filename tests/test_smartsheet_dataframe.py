@@ -113,7 +113,7 @@ class TestGetReportAsDf:
         df = get_report_as_df(token="fake_token", report_id=12345, report_obj=mock_report_obj)
 
         mock_warn.assert_called_with("A 'report_id' has been provided along with a 'report_obj' \n" +
-                                     "The 'sheet_id' parameter will be ignored")
+                                     "The 'report_id' parameter will be ignored")
 
     def test_get_report_as_df_without_token_or_report_obj(self):
         with pytest.raises(ValueError):
