@@ -26,6 +26,7 @@ from smartsheet_dataframe.exceptions import (
 from smartsheet_dataframe.smartsheet_dataframe import (
     _do_request,
     _get_from_request,
+    _handle_object_value,
     _to_dataframe,
 )
 from smartsheet_dataframe.utils.constants import (
@@ -396,3 +397,30 @@ class TestGetFromRequest:
         assert isinstance(response_json, dict)
         assert response_json["data"] == "some_data"
         assert mock_do_request.call_count == 1
+
+
+class TestHandleObjectValue:
+    @pytest.mark.parametrize("object_type,values,expected", [
+        (
+                "MULTI_CONTACT",
+                [{"email": "test1@test.com"}, {"email": "test2@test.com"}],
+                "test1@test.com, test2@test.com"
+        ),
+        (
+                "MULTI_CONTACT", [], ""
+        ),
+        (
+                "SOMETHING_NOT_SUPPORTED", None, ""
+        )
+    ])
+    def test_success(self, object_type, values, expected):
+        """Ensure that obJectValue cell types are handled correctly."""
+
+        object_value = {
+            "objectType": object_type,
+            "values": values
+        }
+
+        result = _handle_object_value(object_value)
+
+        assert result == expected
