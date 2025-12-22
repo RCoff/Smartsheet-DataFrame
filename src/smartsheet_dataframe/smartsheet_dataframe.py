@@ -41,7 +41,7 @@ def get_report_as_df(token: str,
     :type include_row_id: bool
 
     :param include_parent_id: If True, will append a 'parent_id' column to the
-            dataframe and populate with parent ID for each nested row
+            dataframe and populate with parent id for each nested row
     :type include_parent_id: bool
 
     :return: Pandas DataFrame with report data
@@ -70,7 +70,7 @@ def get_sheet_as_df(token: str,
     :type include_row_id: bool
 
     :param include_parent_id: If True, will append a 'parent_id' column to the
-            dataframe and populate with parent ID for each nested row
+            dataframe and populate with parent id for each nested row
     :type include_parent_id: bool
 
     :return: Pandas DataFrame with sheet data
@@ -95,7 +95,7 @@ def get_as_df(token: str,
     :param object_type: type of object to get. Must be one of 'report' or 'sheet'
     :type object_type: str
 
-    :param object_id: Smartsheet object (report or sheet) ID
+    :param object_id: Smartsheet object (report or sheet) id
     :type object_id: int
 
     :param include_row_id: If True, will append a 'row_id' column to the dataframe
@@ -103,7 +103,7 @@ def get_as_df(token: str,
     :type include_row_id: bool
 
     :param include_parent_id: If True, will append a 'parent_id' column to the
-            dataframe and populate with parent ID for each nested row
+            dataframe and populate with parent id for each nested row
     :type include_parent_id: bool
 
     :return: Pandas DataFrame with object data
@@ -123,7 +123,7 @@ def _get_from_request(token: str,
     :param token: Smartsheet personal authentication token
     :type token: str
 
-    :param object_id: Smartsheet object (report or sheet) ID
+    :param object_id: Smartsheet object (report or sheet) id
     :type object_id: int
 
     :param object_type: type of object to get. Must be one of 'REPORT' or 'SHEET'
@@ -167,7 +167,7 @@ def to_dataframe(object_dict: dict,
     :type include_row_id: bool
 
     :param include_parent_id: If True, will append a 'parent_id' column to the
-            dataframe and populate with parent ID for each nested row
+            dataframe and populate with parent id for each nested row
     :type include_parent_id: bool
 
     :return: Pandas DataFrame with object data
