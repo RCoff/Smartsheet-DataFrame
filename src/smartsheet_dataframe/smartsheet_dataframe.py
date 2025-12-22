@@ -83,7 +83,7 @@ def get_sheet_as_df(token: str,
 
 
 def get_as_df(token: str,
-              object_type: Literal["REPORT", "SHEET"],
+              object_type: str,
               object_id: int,
               include_row_id: bool = True,
               include_parent_id: bool = True) -> pd.DataFrame:
