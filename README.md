@@ -18,7 +18,7 @@ TODO:
 
 * Python 3+ (Tested using 3.8+)
 * Pandas >= 0.24.0
-* Requests >= 2.0.0
+* Httpx >= 0.28.1
 
 ## From PyPI
 
@@ -38,9 +38,9 @@ df = get_sheet_as_df(token='smartsheet_auth_token',
                      sheet_id=sheet_id_int)
 
 # Using 'generic' function (without smartsheet-python-sdk)                     
-df = get_as_df(type_='sheet',
+df = get_as_df(object_type='sheet',
                token='smartsheet_auth_token',
-               id_=sheet_id_int)
+               object_id=sheet_id_int)
 ```
 
 Alternatively, sheet objects can be used from the ``smartsheet-python-sdk`` package:
@@ -56,7 +56,7 @@ sheet = smartsheet_client.Sheets.get_sheet(sheet_id_int)
 df = get_sheet_as_df(sheet_obj=sheet)
 
 # And using the 'generic' function
-df = get_as_df(type_='sheet',
+df = get_as_df(object_type='sheet',
                obj=sheet)
 ```
 
@@ -72,9 +72,9 @@ df = get_report_as_df(token='smartsheet_auth_token',
                       report_id=report_id_int)
 
 # Using 'generic' function (without smartsheet-python-sdk)                     
-df = get_as_df(type_='report',
+df = get_as_df(object_type='report',
                token='smartsheet_auth_token',
-               id_=report_id_int)
+               object_id=report_id_int)
 ```
 
 And using a report object from the ``smartsheet-python-sdk`` package:
@@ -90,6 +90,6 @@ report = smartsheet_client.Reports.get_report(report_id_int)
 df = get_report_as_df(report_obj=report)
 
 # And using the 'generic' function
-df = get_as_df(type_='report',
+df = get_as_df(object_type='report',
                obj=report)
 ```
