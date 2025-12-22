@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "smartsheet-dataframe"
-version = "0.3.7"
+version = "1.0.0"
 authors = [
     { name = "Ridge Coffman", email = "coffman.ridge@gmail.com" },
 ]
@@ -26,8 +26,9 @@ classifiers = [
     "Topic :: Office/Business :: Financial :: Spreadsheet",
 ]
 dependencies = [
+    "httpx>=0.22.0",
     "pandas>=0.24.0",
-    "requests>=2.0.0"
+    "requests>=2.0.0",
 ]
 
 [project.urls]
