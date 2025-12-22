@@ -14,7 +14,7 @@ from .smartsheet_dataframe import (
 logger = logging.getLogger(__name__)
 
 
-class Client:
+class BaseClient:
     __slots__ = ("token", "include_row_id", "include_parent_id")
 
     def __init__(self, token: str, include_row_id: bool = True, include_parent_id: bool = True):
@@ -22,6 +22,8 @@ class Client:
         self.include_row_id = include_row_id
         self.include_parent_id = include_parent_id
 
+
+class Client(BaseClient):
     def get_sheet_as_df(self,
                         sheet_id: int,
                         include_row_id: Optional[bool] = None,
