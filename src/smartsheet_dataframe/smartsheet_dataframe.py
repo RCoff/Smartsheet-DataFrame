@@ -8,10 +8,7 @@ reports and sheets as a Pandas DataFrame
 import logging
 import time
 import warnings
-from typing import (
-    Any,
-    Literal,
-)
+from typing import Any
 
 # 3rd-Party Imports
 import pandas as pd
@@ -119,7 +116,7 @@ def get_as_df(token: str,
 
 
 def _get_from_request(token: str,
-                      object_type: Literal["REPORT", "SHEET"],
+                      object_type: str,
                       object_id: int) -> dict:
     """Get a Smartsheet object from the API via HTTP request.
 
@@ -140,16 +137,12 @@ def _get_from_request(token: str,
         raise ValueError(
             f"'object_type' parameter must be one of SHEET or REPORT. The current value is '{object_type.upper()}'")
 
-    if object_type.upper() == "SHEET":
+    if object_type.upper() == SHEET:
         url = f"https://api.smartsheet.com/2.0/sheets/{object_id}?include=objectValue&level=1"
-        logger.debug("Getting sheet request", extra={"id": object_id,
-                                                     "url": url,
-                                                     "object_type": "sheet"})
-    elif object_type.upper() == "REPORT":
+        logger.debug("Getting sheet request", extra={"id": object_id, "url": url, "object_type": SHEET})
+    elif object_type.upper() == REPORT:
         url = f"https://api.smartsheet.com/2.0/reports/{object_id}?pageSize=50000"
-        logger.debug("Getting report request", extra={"id": object_id,
-                                                      "url": url,
-                                                      "object_Type": "report"})
+        logger.debug("Getting report request", extra={"id": object_id, "url": url, "object_Type": REPORT})
     else:
         # Leaving for type checking purposes
         raise ValueError(
