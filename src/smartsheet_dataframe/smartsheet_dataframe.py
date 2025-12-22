@@ -10,7 +10,7 @@ import time
 import warnings
 from typing import (
     Any,
-    Optional,
+    Literal,
 )
 
 # 3rd-Party Imports
@@ -86,7 +86,7 @@ def get_sheet_as_df(token: str,
 
 
 def get_as_df(token: str,
-              object_type: str,
+              object_type: Literal["REPORT", "SHEET"],
               object_id: int,
               include_row_id: bool = True,
               include_parent_id: bool = True) -> pd.DataFrame:
@@ -118,7 +118,9 @@ def get_as_df(token: str,
                         include_parent_id)
 
 
-def _get_from_request(token: str, object_type: str, object_id: int) -> dict:
+def _get_from_request(token: str,
+                      object_type: Literal["REPORT", "SHEET"],
+                      object_id: int) -> dict:
     """Get a Smartsheet object from the API via HTTP request.
 
     :param token: Smartsheet personal authentication token
