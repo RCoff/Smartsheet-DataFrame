@@ -17,7 +17,6 @@ from smartsheet_dataframe import (
     get_as_df,
 )
 from smartsheet_dataframe.smartsheet_dataframe import (
-    _do_request,
     _get_from_request,
     _handle_object_value,
     to_dataframe,
@@ -29,6 +28,7 @@ from smartsheet_dataframe.utils.constants import (
 from smartsheet_dataframe.utils.exceptions import (
     AuthenticationError,
 )
+from smartsheet_dataframe.utils.http import _do_request
 
 load_dotenv()
 

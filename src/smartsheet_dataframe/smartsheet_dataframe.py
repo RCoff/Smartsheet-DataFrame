@@ -6,16 +6,12 @@ reports and sheets as a Pandas DataFrame
 
 # Standard Imports
 import logging
-import time
-import warnings
 from typing import Any
 
 # 3rd-Party Imports
 import pandas as pd
-import requests
 
 # Local Imports
-from .exceptions import AuthenticationError
 from .utils.constants import (
     REPORT,
     SHEET,
@@ -23,6 +19,7 @@ from .utils.constants import (
 from .utils.exceptions import (
     AuthenticationError,
 )
+from .utils.http import _do_request
 
 logger = logging.getLogger(__name__)
 
@@ -208,56 +205,6 @@ def to_dataframe(object_dict: dict,
             rows_list.append(cells_list)
 
     return pd.DataFrame(rows_list, columns=columns_list)  # pyright: ignore
-
-
-def _do_request(url: str, options: dict, retries: int = 3) -> requests.Response:
-    """Do the HTTP request, handling rate limit retrying.
-
-    :param url: Smartsheet API URL
-    :type url: str
-
-    :param options: API request headers
-    :type options: dict
-
-    :param retries: Number of retries
-    :type retries: int
-
-    :return: Requests response object
-    :rtype: requests.Response
-    """
-
-    i = 0
-    for i in range(retries):
-        try:
-            response = requests.get(url, headers=options)
-            response_json = response.json()
-
-            if response.status_code != 200:
-                if response_json["errorCode"] in (1002, 1003, 1004):
-                    raise AuthenticationError("Could not connect using the supplied auth token \n" +
-                                              response.text)
-                elif response_json["errorCode"] == 4004:
-                    logger.debug(f"Rate limit exceeded. Waiting and trying again... {i}")
-                    time.sleep(5 + (i * 5))
-                    continue
-                else:
-                    warnings.warn("An unhandled status_code was returned by the Smartsheet API: \n" +
-                                  response.text)
-                    return  # TODO: Fix reportReturnType
-        except AuthenticationError:
-            logger.exception("Smartsheet returned an error status code")
-            # TODO: For 1.0 release, ensure that this is re-raised
-            break
-        except Exception:
-            logger.exception(f"Not able to retrieve get response. Retrying... {i}")
-            time.sleep(5 + (i * 5))
-            continue
-        break
-    else:
-        # TODO: For 1.0 release, re-raise exception
-        raise Exception(f"Could not retrieve request after retrying {i} times")
-
-    return response  # TODO: Fix reportPossiblyUnboundVariable
 
 
 def _handle_object_value(object_value: dict) -> str:
