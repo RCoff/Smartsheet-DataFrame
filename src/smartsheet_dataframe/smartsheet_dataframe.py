@@ -19,7 +19,7 @@ from .utils.constants import (
 from .utils.exceptions import (
     AuthenticationError,
 )
-from .utils.http import _do_request
+from .utils._http import _do_request
 
 logger = logging.getLogger(__name__)
 

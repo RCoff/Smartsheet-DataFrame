@@ -8,7 +8,7 @@ from unittest.mock import (
 import pytest
 
 # Local Imports
-from smartsheet_dataframe.utils.http import (
+from smartsheet_dataframe.utils._http import (
     _async_do_request,
     _do_request,
 )
