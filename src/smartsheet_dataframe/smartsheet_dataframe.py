@@ -20,6 +20,9 @@ from .utils.constants import (
     REPORT,
     SHEET,
 )
+from .utils.exceptions import (
+    AuthenticationError,
+)
 
 logger = logging.getLogger(__name__)
 
